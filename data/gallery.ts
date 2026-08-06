@@ -1,0 +1,61 @@
+import type { GalleryImage } from "@/types/media";
+
+export const galleryImages: GalleryImage[] = [
+  {
+    id: "constanza-01",
+    src: "/images/gallery/experiencia-constanza-01.webp",
+    alt: "Paisaje natural visitado durante una excursión de Ruticas RD en Constanza",
+    category: "naturaleza",
+    location: "Constanza",
+    orientation: "vertical",
+    featured: true,
+  },
+  {
+    id: "constanza-02",
+    src: "/images/gallery/experiencia-constanza-02.webp",
+    alt: "Experiencia realizada por Ruticas RD en Constanza",
+    category: "aventura",
+    location: "Constanza",
+    orientation: "vertical",
+    featured: true,
+  },
+  {
+    id: "constanza-03",
+    src: "/images/gallery/experiencia-constanza-03.webp",
+    alt: "Recorrido natural organizado por Ruticas RD en Constanza",
+    category: "naturaleza",
+    location: "Constanza",
+    orientation: "vertical",
+  },
+  {
+    id: "grupal-01",
+    src: "/images/gallery/experiencia-grupal-01.webp",
+    alt: "Participantes compartiendo durante una excursión de Ruticas RD",
+    category: "grupo",
+    location: "Constanza",
+    orientation: "horizontal",
+    featured: true,
+  },
+  {
+    id: "grupal-02",
+    src: "/images/gallery/experiencia-grupal-02.webp",
+    alt: "Grupo de participantes disfrutando una experiencia de Ruticas RD",
+    category: "grupo",
+    location: "Constanza",
+    orientation: "horizontal",
+  },
+  {
+    id: "paisaje-01",
+    src: "/images/gallery/paisaje-01.webp",
+    alt: "Paisaje natural de República Dominicana visitado por Ruticas RD",
+    category: "destino",
+    orientation: "horizontal",
+  },
+  {
+    id: "paisaje-02",
+    src: "/images/gallery/paisaje-02.webp",
+    alt: "Vista panorámica de un destino natural de República Dominicana",
+    category: "destino",
+    orientation: "horizontal",
+  },
+];

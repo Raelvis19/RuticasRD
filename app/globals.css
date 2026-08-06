@@ -6,7 +6,7 @@
   --ruticas-green-light: #a3e635;
   --ruticas-white: #ffffff;
   --ruticas-off-white: #f4f7f5;
-  --ruticas-text: #14231c;
+  --ruticas-text: #f3f8f6;
 }
 
 * {
@@ -41,5 +41,5 @@ button {
 
 ::selection {
   background: #a3e635;
-  color: #07130f;
+  color: #ffffff;
 }

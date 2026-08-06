@@ -94,10 +94,10 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "relative py-2 text-sm font-semibold transition-colors",
+                  "relative py-2 text-sm font-bold transition-colors",
                   isActive
                     ? "text-lime-300"
-                    : "text-white/75 hover:text-white",
+                    : "text-white hover:text-lime-300",
                 )}
               >
                 {link.label}

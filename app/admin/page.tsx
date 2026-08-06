@@ -1,10 +1,10 @@
 import ComingSoonPage from "@/components/ui/ComingSoonPage";
 
-export default function AdminPage() {
+export default function AdminToursPage() {
   return (
     <ComingSoonPage
-      title="Panel administrativo"
-      description="El panel de administración de Ruticas RD está en desarrollo."
+      title="Administración de tours"
+      description="Desde aquí se podrán crear, editar, publicar y administrar las excursiones de Ruticas RD."
     />
   );
 }

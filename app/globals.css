@@ -6,7 +6,7 @@
   --ruticas-green-light: #a3e635;
   --ruticas-white: #ffffff;
   --ruticas-off-white: #f4f7f5;
-  --ruticas-text: #f3f8f6;
+  --ruticas-text: #14231c;
 }
 
 * {
@@ -14,15 +14,23 @@
 }
 
 html {
+  min-width: 320px;
   scroll-behavior: smooth;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
+  overflow-x: hidden;
+  background: var(--ruticas-off-white);
+  color: var(--ruticas-text);
   font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -31,15 +39,102 @@ a {
 }
 
 button,
-a {
+a,
+input,
+select,
+textarea,
+[role="button"] {
   -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"],
+input[type="checkbox"],
+input[type="radio"] {
+  touch-action: manipulation;
 }
 
 button {
   font: inherit;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+
+img,
+svg {
+  max-width: 100%;
 }
 
 ::selection {
   background: #a3e635;
-  color: #ffffff;
+  color: #07130f;
+}
+
+/* iOS safe areas and touch targets */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.tap-target {
+  min-width: 48px;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    font-size: 16px !important;
+  }
+
+  button,
+  a[role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.nav-offset {
+  padding-top: calc(7rem + env(safe-area-inset-top, 0px));
+}
+
+@media (min-width: 640px) {
+  .nav-offset {
+    padding-top: calc(8rem + env(safe-area-inset-top, 0px));
+  }
 }

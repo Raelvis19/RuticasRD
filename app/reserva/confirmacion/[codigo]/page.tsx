@@ -1,10 +1,17 @@
-import ComingSoonPage from "@/components/ui/ComingSoonPage";
+import ReservationConfirmation from "@/components/reservations/ReservationConfirmation";
 
-export default function ReservationConfirmationPage() {
+interface ConfirmationPageProps {
+  params: Promise<{
+    codigo: string;
+  }>;
+}
+
+export default async function ConfirmationPage({
+  params,
+}: ConfirmationPageProps) {
+  const { codigo } = await params;
+
   return (
-    <ComingSoonPage
-      title="Confirmación de reservación"
-      description="Aquí aparecerá el código y el estado de la reservación."
-    />
+    <ReservationConfirmation code={codigo} />
   );
 }

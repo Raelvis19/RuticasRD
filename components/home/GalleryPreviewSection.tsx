@@ -29,7 +29,7 @@ export default function GalleryPreviewSection() {
   }
 
   return (
-    <section className="bg-[#f4f7f5] px-5 py-20 text-[#14231c] sm:px-6 lg:px-8 lg:py-28">
+    <section className="bg-[#f4f7f5] px-4 py-14 text-[#14231c] sm:px-6 sm:py-20 lg:px-8 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
@@ -50,14 +50,14 @@ export default function GalleryPreviewSection() {
 
           <Link
             href="/galeria"
-            className="inline-flex w-fit items-center gap-2 font-extrabold text-[#0f5132] transition hover:gap-3"
+            className="hidden min-h-12 w-fit touch-manipulation items-center gap-2 rounded-xl pr-3 font-extrabold text-[#0f5132] transition active:opacity-70 md:inline-flex sm:hover:gap-3"
           >
             Explorar la galería
             <ArrowRight size={19} aria-hidden="true" />
           </Link>
         </div>
 
-        <div className="mt-12 grid auto-rows-[180px] grid-cols-2 gap-3 sm:auto-rows-[220px] sm:gap-5 lg:auto-rows-[240px]">
+        <div className="mt-8 grid auto-rows-[165px] grid-cols-2 gap-3 sm:mt-12 sm:auto-rows-[220px] sm:gap-5 lg:auto-rows-[240px]">
           {previewImages.map((image, index) => (
             <article
               key={image.id}
@@ -102,7 +102,7 @@ export default function GalleryPreviewSection() {
         <div className="mt-10 flex justify-center md:hidden">
           <Link
             href="/galeria"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0f5132] px-7 py-3.5 font-extrabold text-white"
+            className="inline-flex min-h-14 touch-manipulation items-center justify-center gap-2 rounded-full bg-[#0f5132] px-7 py-3.5 font-extrabold text-white transition active:scale-[0.98] active:bg-[#0b3d26]"
           >
             Ver todas las experiencias
             <ArrowRight size={19} aria-hidden="true" />

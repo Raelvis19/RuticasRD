@@ -11,7 +11,7 @@ export default function ComingSoonPage({
   description = "Estamos preparando esta sección de Ruticas RD.",
 }: ComingSoonPageProps) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#07130f] px-5 pb-16 pt-32 text-white">
+    <main className="flex min-h-screen items-center justify-center bg-[#07130f] px-5 pb-16 nav-offset text-white">
       <section className="mx-auto max-w-2xl text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-lime-400/15 text-lime-300">
           <Mountain size={32} aria-hidden="true" />
@@ -31,7 +31,7 @@ export default function ComingSoonPage({
 
         <Link
           href="/"
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-lime-400 px-6 py-3 font-extrabold text-[#07130f] transition hover:bg-lime-300"
+          className="mt-8 inline-flex min-h-14 touch-manipulation items-center gap-2 rounded-full bg-lime-400 px-6 py-3 font-extrabold text-[#07130f] transition active:scale-[0.98] active:bg-lime-300 sm:hover:bg-lime-300"
         >
           <ArrowLeft size={19} aria-hidden="true" />
           Volver al inicio

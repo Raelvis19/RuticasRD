@@ -4,64 +4,50 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { siteContent } from "@/data/site-content";
 import { cn } from "@/lib/utils";
 
 const navigationLinks = [
-  {
-    label: "Inicio",
-    href: "/",
-  },
-  {
-    label: "Tours",
-    href: "/tours",
-  },
-  {
-    label: "Nosotros",
-    href: "/nosotros",
-  },
-  {
-    label: "Galería",
-    href: "/galeria",
-  },
-  {
-    label: "Preguntas",
-    href: "/preguntas-frecuentes",
-  },
-  {
-    label: "Contacto",
-    href: "/contacto",
-  },
+  { label: "Inicio", href: "/" },
+  { label: "Tours", href: "/tours" },
+  { label: "Nosotros", href: "/nosotros" },
+  { label: "Galería", href: "/galeria" },
+  { label: "Preguntas", href: "/preguntas-frecuentes" },
+  { label: "Contacto", href: "/contacto" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const isActiveRoute = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
+  useEffect(() => {
+    if (!isMenuOpen) return;
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMenuOpen]);
+
+  const isActiveRoute = (href: string) => {
+    if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
 
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#07130f]/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
+    <header className="safe-top fixed inset-x-0 top-0 z-[100] border-b border-white/10 bg-[#07130f]/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3"
-          onClick={closeMenu}
+          className="flex min-h-12 touch-manipulation items-center gap-2.5 rounded-xl sm:gap-3"
           aria-label="Ir al inicio de Ruticas RD"
+          onClick={() => setIsMenuOpen(false)}
         >
-          <div className="relative h-13 w-13 overflow-hidden rounded-full bg-white shadow-lg">
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-white shadow-lg sm:h-13 sm:w-13">
             <Image
               src="/images/brand/logo-ruticas.png"
               alt="Logo de Ruticas RD"
@@ -71,21 +57,17 @@ export default function Navbar() {
             />
           </div>
 
-          <div>
-            <p className="text-base font-extrabold tracking-wide text-white sm:text-lg">
+          <div className="min-w-0">
+            <p className="truncate text-base font-extrabold tracking-wide text-white sm:text-lg">
               {siteContent.brand.name}
             </p>
-
             <p className="hidden text-xs font-medium tracking-wide text-white/60 sm:block">
               {siteContent.brand.slogan}
             </p>
           </div>
         </Link>
 
-        <nav
-          className="hidden items-center gap-7 lg:flex"
-          aria-label="Navegación principal"
-        >
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Navegación principal">
           {navigationLinks.map((link) => {
             const isActive = isActiveRoute(link.href);
 
@@ -94,14 +76,11 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "relative py-2 text-sm font-bold transition-colors",
-                  isActive
-                    ? "text-lime-300"
-                    : "text-white hover:text-lime-300",
+                  "relative flex min-h-11 touch-manipulation items-center py-2 text-sm font-bold transition-colors",
+                  isActive ? "text-lime-300" : "text-white hover:text-lime-300",
                 )}
               >
                 {link.label}
-
                 {isActive && (
                   <span className="absolute inset-x-0 -bottom-1 mx-auto h-0.5 w-5 rounded-full bg-lime-300" />
                 )}
@@ -113,7 +92,7 @@ export default function Navbar() {
         <div className="hidden lg:block">
           <Link
             href="/tours"
-            className="inline-flex items-center justify-center rounded-full bg-lime-400 px-6 py-3 text-sm font-extrabold text-[#07130f] transition hover:bg-lime-300 focus:outline-none focus:ring-2 focus:ring-lime-300 focus:ring-offset-2 focus:ring-offset-[#07130f]"
+            className="inline-flex min-h-12 touch-manipulation items-center justify-center rounded-full bg-lime-400 px-6 py-3 text-sm font-extrabold text-[#07130f] transition hover:bg-lime-300 focus:outline-none focus:ring-2 focus:ring-lime-300 focus:ring-offset-2 focus:ring-offset-[#07130f]"
           >
             Reservar aventura
           </Link>
@@ -121,7 +100,7 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:bg-white/10 lg:hidden"
+          className="tap-target inline-flex shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition active:scale-95 active:bg-white/15 lg:hidden"
           onClick={() => setIsMenuOpen((currentState) => !currentState)}
           aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
           aria-expanded={isMenuOpen}
@@ -134,12 +113,12 @@ export default function Navbar() {
       {isMenuOpen && (
         <div
           id="mobile-navigation"
-          className="border-t border-white/10 bg-[#07130f] px-5 pb-6 pt-4 lg:hidden"
+          className="safe-bottom overflow-y-auto overscroll-contain border-t border-white/10 bg-[#07130f] px-4 pt-3 lg:hidden"
+          style={{
+            maxHeight: "calc(100dvh - 5rem - env(safe-area-inset-top, 0px))",
+          }}
         >
-          <nav
-            className="mx-auto flex max-w-7xl flex-col"
-            aria-label="Navegación móvil"
-          >
+          <nav className="mx-auto flex max-w-7xl flex-col gap-1" aria-label="Navegación móvil">
             {navigationLinks.map((link) => {
               const isActive = isActiveRoute(link.href);
 
@@ -147,12 +126,12 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={closeMenu}
+                  onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    "rounded-xl px-4 py-3.5 text-base font-semibold transition",
+                    "flex min-h-12 touch-manipulation items-center rounded-2xl px-4 py-3 text-base font-semibold transition active:scale-[0.99]",
                     isActive
                       ? "bg-lime-400/10 text-lime-300"
-                      : "text-white/80 hover:bg-white/5 hover:text-white",
+                      : "text-white/80 active:bg-white/10",
                   )}
                 >
                   {link.label}
@@ -162,8 +141,8 @@ export default function Navbar() {
 
             <Link
               href="/tours"
-              onClick={closeMenu}
-              className="mt-4 inline-flex items-center justify-center rounded-full bg-lime-400 px-6 py-3.5 font-extrabold text-[#07130f]"
+              onClick={() => setIsMenuOpen(false)}
+              className="mt-3 inline-flex min-h-14 touch-manipulation items-center justify-center rounded-full bg-lime-400 px-6 py-3.5 font-extrabold text-[#07130f] active:scale-[0.98] active:bg-lime-300"
             >
               Reservar aventura
             </Link>

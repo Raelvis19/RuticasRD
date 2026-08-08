@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function GalleryPage() {
   return (
-    <main className="min-h-screen bg-[#f4f7f5] px-5 pb-24 pt-32 text-[#14231c] sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#f4f7f5] px-4 pb-20 nav-offset text-[#14231c] sm:px-6 sm:pb-24 lg:px-8">
       <section className="mx-auto max-w-7xl">
         <div className="max-w-3xl">
           <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#0f5132]">
@@ -27,7 +27,7 @@ export default function GalleryPage() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {galleryImages.map((image) => (
             <article
               key={image.id}

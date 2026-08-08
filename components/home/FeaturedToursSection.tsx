@@ -18,7 +18,7 @@ export default function FeaturedToursSection() {
   }
 
   return (
-    <section className="bg-[#07130f] px-5 py-20 sm:px-6 lg:px-8 lg:py-28">
+    <section className="bg-[#07130f] px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
@@ -39,14 +39,14 @@ export default function FeaturedToursSection() {
 
           <Link
             href="/tours"
-            className="inline-flex w-fit items-center gap-2 font-extrabold text-lime-300 transition hover:gap-3 hover:text-lime-200"
+            className="inline-flex min-h-12 w-fit touch-manipulation items-center gap-2 rounded-xl pr-3 font-extrabold text-lime-300 transition active:text-lime-200 sm:hover:gap-3 sm:hover:text-lime-200"
           >
             Ver todos los tours
             <ArrowRight size={19} aria-hidden="true" />
           </Link>
         </div>
 
-        <div className="mt-12 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:mt-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-7">
           {featuredTours.map((tour) => (
             <TourCard key={tour.id} tour={tour} />
           ))}

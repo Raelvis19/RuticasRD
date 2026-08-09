@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -300,14 +301,12 @@ function ReservationSteps({ currentStep }: { currentStep: number }) {
           return (
             <div key={label}>
               <div
-                className={`h-2 rounded-full ${
-                  active ? "bg-[#0f5132]" : "bg-[#dce5df]"
-                }`}
+                className={`h-2 rounded-full ${active ? "bg-[#0f5132]" : "bg-[#dce5df]"
+                  }`}
               />
               <p
-                className={`mt-2 hidden text-xs font-bold sm:block ${
-                  active ? "text-[#0f5132]" : "text-[#8a9a92]"
-                }`}
+                className={`mt-2 hidden text-xs font-bold sm:block ${active ? "text-[#0f5132]" : "text-[#8a9a92]"
+                  }`}
               >
                 {number}. {label}
               </p>
@@ -696,11 +695,29 @@ function StepThree({
       </div>
 
       <div className="mt-7 space-y-3">
-        <ConfirmationCheckbox
-          checked={acceptedTerms}
-          onChange={onAcceptedTerms}
-          text="He leído y acepto las políticas, condiciones de cancelación y riesgos inherentes de esta excursión."
-        />
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#dce5df] p-4">
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(event) =>
+              onAcceptedTerms(event.target.checked)
+            }
+            className="mt-1 h-5 w-5 shrink-0 accent-[#0f5132]"
+          />
+
+          <span className="text-sm leading-6 text-[#52675e]">
+            He leído y acepto las{" "}
+            <Link
+              href="/politicas"
+              target="_blank"
+              className="font-black text-[#0f5132] underline decoration-[#0f5132]/30 underline-offset-4"
+            >
+              políticas y condiciones
+            </Link>{" "}
+            aplicables, incluyendo las condiciones de cancelación y
+            los riesgos informados para esta excursión.
+          </span>
+        </label>
         <ConfirmationCheckbox
           checked={confirmedData}
           onChange={onConfirmedData}
@@ -870,9 +887,8 @@ function PriceRow({
     <div className="flex items-center justify-between gap-4">
       <span className="min-w-0 text-sm opacity-65">{label}</span>
       <span
-        className={`shrink-0 text-right font-black ${
-          highlighted ? "text-lime-400" : ""
-        }`}
+        className={`shrink-0 text-right font-black ${highlighted ? "text-lime-400" : ""
+          }`}
       >
         {value}
       </span>

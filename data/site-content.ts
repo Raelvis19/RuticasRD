@@ -49,9 +49,9 @@ export const siteContent = {
   ],
 
   contact: {
-    whatsapp: "",
-    phone: "",
-    email: "",
+    whatsapp: "18293907333",
+    phone: "18293907333",
+    email: "leury0104@gmail.com",
     instagramUsername: "ruticasrd",
     instagramUrl: "https://www.instagram.com/ruticasrd",
     location: "San Francisco de Macorís, República Dominicana",

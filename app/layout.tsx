@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
 import { Montserrat } from "next/font/google";
 
-import Navbar from "@/components/layout/Navbar";
+import SiteChrome from "@/components/layout/SiteChrome";
 
 import "./globals.css";
 
@@ -30,13 +31,18 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
-    <html lang="es" className={montserrat.variable} suppressHydrationWarning>
+    <html
+      lang="es"
+      className={montserrat.variable}
+      suppressHydrationWarning
+    >
       <body>
-        <Navbar />
-        {children}
+        <SiteChrome>
+          {children}
+        </SiteChrome>
       </body>
     </html>
   );

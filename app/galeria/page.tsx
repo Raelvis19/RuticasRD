@@ -9,6 +9,7 @@ export const metadata = {
 };
 
 export default function GalleryPage() {
+  
   return (
     <main className="min-h-screen bg-[#f4f7f5] px-4 pb-20 nav-offset text-[#14231c] sm:px-6 sm:pb-24 lg:px-8">
       <section className="mx-auto max-w-7xl">

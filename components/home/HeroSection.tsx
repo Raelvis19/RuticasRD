@@ -75,7 +75,12 @@ export default function HeroSection() {
 
             <Link
               href={hero.secondaryAction.href}
-              className="inline-flex min-h-14 touch-manipulation items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-base font-bold text-white backdrop-blur-md transition active:scale-[0.98] active:bg-white/20 sm:px-7 sm:hover:bg-white/20"
+              style={{
+                color: "#ffffff",
+                backgroundColor: "rgba(7, 19, 15, 0.78)",
+                borderColor: "rgba(255, 255, 255, 0.65)",
+              }}
+              className="inline-flex min-h-14 touch-manipulation items-center justify-center rounded-full border px-6 py-3.5 text-base font-bold shadow-lg shadow-black/25 backdrop-blur-md transition active:scale-[0.98] active:opacity-90 sm:px-7 sm:hover:-translate-y-0.5 sm:hover:opacity-90"
             >
               {hero.secondaryAction.label}
             </Link>

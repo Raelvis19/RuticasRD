@@ -26,9 +26,7 @@ export default function SiteChrome({
     <>
       <Navbar />
 
-      <main>
-        {children}
-      </main>
+      {children}
 
       <Footer />
 

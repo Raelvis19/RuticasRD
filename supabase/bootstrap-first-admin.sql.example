@@ -1,0 +1,22 @@
+-- Run this only in the Supabase SQL Editor after creating the user in
+-- Authentication > Users. Replace both values before running it.
+
+insert into public.profiles (
+  id,
+  full_name,
+  role,
+  is_active
+)
+values (
+  'REPLACE_WITH_AUTH_USER_UUID',
+  'Administrador Ruticas RD',
+  'admin',
+  true
+)
+on conflict (id) do update
+set
+  full_name = excluded.full_name,
+  role = 'admin',
+  is_active = true,
+  updated_at = now();
+

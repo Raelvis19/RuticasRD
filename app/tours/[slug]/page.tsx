@@ -19,8 +19,8 @@ import {
   X,
 } from "lucide-react";
 
-import { mockTours } from "@/data/mock-tours";
 import { formatDop, formatLongTourDate } from "@/lib/format";
+import { getPublicTourBySlug } from "@/lib/tours/public";
 import type {
   TourCategory,
   TourDifficulty,
@@ -51,20 +51,12 @@ const categoryLabels: Record<TourCategory, string> = {
   turistico: "Destino turístico",
 };
 
-export function generateStaticParams() {
-  return mockTours.map((tour) => ({
-    slug: tour.slug,
-  }));
-}
-
 export async function generateMetadata({
   params,
 }: TourPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const tour = mockTours.find(
-    (currentTour) => currentTour.slug === slug,
-  );
+  const tour = await getPublicTourBySlug(slug);
 
   if (!tour) {
     return {
@@ -83,9 +75,7 @@ export default async function TourDetailPage({
 }: TourPageProps) {
   const { slug } = await params;
 
-  const tour = mockTours.find(
-    (currentTour) => currentTour.slug === slug,
-  );
+  const tour = await getPublicTourBySlug(slug);
 
   if (!tour) {
     notFound();

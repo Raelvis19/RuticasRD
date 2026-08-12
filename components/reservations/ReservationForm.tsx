@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  LoaderCircle,
   Minus,
   Plus,
   ShieldCheck,
@@ -16,6 +17,7 @@ import {
   UsersRound,
 } from "lucide-react";
 
+import { createReservationAction } from "@/app/reservar/actions";
 import { formatDop } from "@/lib/format";
 import type { Tour } from "@/types/tour";
 
@@ -70,6 +72,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [confirmedData, setConfirmedData] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalAmount = useMemo(
     () => tour.price * participantCount,
@@ -167,13 +170,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
     scrollToFormTop();
   }
 
-  function generateReservationCode() {
-    const year = new Date().getFullYear();
-    const random = Math.floor(1000 + Math.random() * 9000);
-    return `RUT-${year}-${random}`;
-  }
-
-  function submitReservation() {
+  async function submitReservation() {
     if (!acceptedTerms || !confirmedData) {
       setError(
         "Debes aceptar las condiciones y confirmar que los datos son correctos.",
@@ -181,9 +178,32 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       return;
     }
 
-    const code = generateReservationCode();
-    const demoReservation = {
-      code,
+    setError("");
+    setIsSubmitting(true);
+    let result: Awaited<ReturnType<typeof createReservationAction>>;
+
+    try {
+      result = await createReservationAction({
+        tourId: tour.id,
+        customer,
+        participants,
+      });
+    } catch {
+      setIsSubmitting(false);
+      setError(
+        "No pudimos conectar con Supabase. Comprueba tu conexión e inténtalo nuevamente.",
+      );
+      return;
+    }
+
+    if (!result.code) {
+      setIsSubmitting(false);
+      setError(result.error ?? "No pudimos registrar la reservación.");
+      return;
+    }
+
+    const storedReservation = {
+      code: result.code,
       tourId: tour.id,
       tourTitle: tour.title,
       tourDate: tour.date,
@@ -199,14 +219,14 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
     try {
       sessionStorage.setItem(
         "ruticas:lastReservation",
-        JSON.stringify(demoReservation),
+        JSON.stringify(storedReservation),
       );
     } catch {
       // Algunos navegadores integrados o modos privados pueden restringir storage.
       // La navegación continúa; la confirmación mostrará el código aunque no haya resumen.
     }
 
-    router.push(`/reserva/confirmacion/${code}`);
+    router.push(`/reserva/confirmacion/${result.code}`);
   }
 
   return (
@@ -264,6 +284,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
               onConfirmedData={setConfirmedData}
               onBack={() => goToStep(2)}
               onSubmit={submitReservation}
+              isSubmitting={isSubmitting}
             />
           )}
         </div>
@@ -624,6 +645,7 @@ function StepThree({
   onConfirmedData,
   onBack,
   onSubmit,
+  isSubmitting,
 }: {
   tour: Tour;
   customer: CustomerForm;
@@ -637,7 +659,8 @@ function StepThree({
   onAcceptedTerms: (value: boolean) => void;
   onConfirmedData: (value: boolean) => void;
   onBack: () => void;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
+  isSubmitting: boolean;
 }) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -746,6 +769,7 @@ function StepThree({
         <button
           type="button"
           onClick={onBack}
+          disabled={isSubmitting}
           className="flex min-h-14 flex-1 touch-manipulation items-center justify-center gap-2 rounded-full border border-[#ccd9d2] bg-white px-5 font-black transition active:scale-[0.98] active:bg-[#f4f7f5]"
         >
           <ArrowLeft size={18} />
@@ -753,10 +777,15 @@ function StepThree({
         </button>
         <button
           type="submit"
-          className="flex min-h-14 flex-[1.4] touch-manipulation items-center justify-center gap-2 rounded-full bg-lime-400 px-6 font-black text-[#07130f] transition active:scale-[0.98] active:bg-lime-300 sm:hover:bg-lime-300"
+          disabled={isSubmitting}
+          className="flex min-h-14 flex-[1.4] touch-manipulation items-center justify-center gap-2 rounded-full bg-lime-400 px-6 font-black text-[#07130f] transition active:scale-[0.98] active:bg-lime-300 disabled:cursor-wait disabled:opacity-65 sm:hover:bg-lime-300"
         >
-          Solicitar reservación
-          <Check size={19} />
+          {isSubmitting ? (
+            <LoaderCircle size={19} className="animate-spin" />
+          ) : (
+            <Check size={19} />
+          )}
+          {isSubmitting ? "Registrando..." : "Solicitar reservación"}
         </button>
       </div>
     </form>

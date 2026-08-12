@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 import ToursCatalog from "@/components/tours/ToursCatalog";
-import { mockTours } from "@/data/mock-tours";
+import { getPublicTours } from "@/lib/tours/public";
 
 export const metadata = {
   title: "Tours y excursiones",
@@ -14,12 +14,8 @@ export const metadata = {
     "Descubre las próximas excursiones, aventuras y experiencias organizadas por Ruticas RD en República Dominicana.",
 };
 
-export default function ToursPage() {
-  const publishedTours = mockTours.filter(
-    (tour) =>
-      tour.status === "publicado" ||
-      tour.status === "cupos_agotados",
-  );
+export default async function ToursPage() {
+  const publishedTours = await getPublicTours();
 
   return (
     <main>

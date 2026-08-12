@@ -75,9 +75,10 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                style={{ color: "#ffffff" }}
                 className={cn(
                   "relative flex min-h-11 touch-manipulation items-center py-2 text-sm font-bold transition-colors",
-                  isActive ? "text-lime-300" : "text-white hover:text-lime-300",
+                  "hover:opacity-80",
                 )}
               >
                 {link.label}
@@ -127,11 +128,12 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
+                  style={{ color: "#ffffff" }}
                   className={cn(
                     "flex min-h-12 touch-manipulation items-center rounded-2xl px-4 py-3 text-base font-semibold transition active:scale-[0.99]",
                     isActive
-                      ? "bg-lime-400/10 text-lime-300"
-                      : "text-white/80 active:bg-white/10",
+                      ? "bg-lime-400/10"
+                      : "active:bg-white/10",
                   )}
                 >
                   {link.label}

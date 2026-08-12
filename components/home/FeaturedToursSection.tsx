@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ArrowRight, Compass } from "lucide-react";
 
 import TourCard from "@/components/tours/TourCard";
-import { mockTours } from "@/data/mock-tours";
+import { getPublicTours } from "@/lib/tours/public";
 
-export default function FeaturedToursSection() {
-  const featuredTours = mockTours
+export default async function FeaturedToursSection() {
+  const featuredTours = (await getPublicTours())
     .filter(
       (tour) =>
         tour.featured &&

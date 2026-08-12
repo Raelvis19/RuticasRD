@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import ReservationClient from "@/components/reservations/ReservationClient";
-import { mockTours } from "@/data/mock-tours";
+import { getPublicTourById } from "@/lib/tours/public";
 
 interface ReservationPageProps {
   params: Promise<{
@@ -13,7 +13,7 @@ interface ReservationPageProps {
 
 export default async function ReservationPage({ params }: ReservationPageProps) {
   const { tourId } = await params;
-  const tour = mockTours.find((currentTour) => currentTour.id === tourId);
+  const tour = await getPublicTourById(tourId);
 
   if (!tour) notFound();
 

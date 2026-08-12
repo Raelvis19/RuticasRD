@@ -70,14 +70,16 @@ export const policies: PolicySection[] = [
       "Qué ocurre cuando una persona necesita cancelar su participación.",
     icon: CalendarClock,
     points: [
-      "Las condiciones de cancelación pueden variar según la excursión.",
-      "Cada tour deberá indicar las condiciones aplicables antes de realizar la reservación.",
-      "Dependiendo de la anticipación con la que se solicite una cancelación, podrá aplicar un reembolso total, parcial o ninguna devolución.",
-      "Cualquier solicitud de cancelación deberá realizarse utilizando los medios oficiales de contacto de Ruticas RD.",
-      "Los costos ya comprometidos o no recuperables asociados a una excursión podrán influir en el monto reembolsable cuando así se haya informado previamente.",
+      "Las cancelaciones solicitadas por participantes no generan un reembolso automático.",
+      "El participante podrá transferir o ceder su cupo a otra persona si lo comunica previamente a Ruticas RD y entrega los datos del sustituto dentro del plazo establecido.",
+      "Cualquier pago o compensación entre quien cede el cupo y quien lo recibe será acordado directamente entre ambas partes, sin intervención ni responsabilidad de Ruticas RD.",
+      "Encontrar un sustituto es responsabilidad del participante. Si no lo consigue dentro del plazo, el cupo se considerará cancelado sin reembolso automático.",
+      "Una cancelación tampoco genera automáticamente crédito para futuras excursiones.",
+      "Las situaciones graves o extraordinarias podrán evaluarse individualmente. Ruticas RD podrá solicitar información o documentación razonable y considerar la naturaleza del caso, el momento de la solicitud y los costos ya realizados, comprometidos o no recuperables.",
+      "La evaluación de una situación excepcional no garantiza un reembolso, una devolución parcial, un crédito ni otra alternativa.",
     ],
     important:
-      "Antes de reservar, revisa siempre la política específica de cancelación mostrada en la página de la excursión.",
+      "Toda cancelación o cesión de cupo debe comunicarse por los medios oficiales de Ruticas RD dentro del plazo aplicable a la excursión.",
   },
 
   {
@@ -90,7 +92,8 @@ export const policies: PolicySection[] = [
     points: [
       "Ruticas RD podrá modificar horarios, rutas o determinados aspectos logísticos cuando existan razones operativas o de seguridad.",
       "Si una excursión debe ser cancelada por Ruticas RD, se informará a los participantes utilizando los medios de contacto disponibles.",
-      "Cuando Ruticas RD cancele completamente la excursión, se ofrecerá la devolución correspondiente o una alternativa de reprogramación.",
+      "Cuando Ruticas RD cancele completamente la excursión, evaluará la solución aplicable según las circunstancias y los costos ya realizados o comprometidos.",
+      "Según corresponda, la solución podrá consistir en una reprogramación, un crédito, una devolución total o una devolución parcial; ninguna alternativa se presume automáticamente antes de evaluar el caso.",
       "Los cambios importantes serán comunicados con la mayor anticipación posible.",
     ],
   },
@@ -106,7 +109,8 @@ export const policies: PolicySection[] = [
       "Cada excursión indicará la hora y el lugar oficial de encuentro.",
       "Los participantes deberán presentarse con la anticipación recomendada en la información del tour.",
       "Ruticas RD podrá iniciar el recorrido a la hora programada para evitar afectar al resto del grupo.",
-      "Las consecuencias económicas de una llegada tardía o ausencia dependerán de las condiciones previamente informadas para la excursión.",
+      "Llegar tarde, no presentarse o perder la salida no da derecho automático a reembolso, crédito ni reprogramación.",
+      "Una circunstancia excepcional relacionada con la tardanza o ausencia podrá evaluarse individualmente, sin que ello garantice una compensación.",
     ],
   },
 

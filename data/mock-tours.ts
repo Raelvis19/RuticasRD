@@ -72,7 +72,7 @@ export const mockTours: Tour[] = [
       "Los participantes deben llegar al punto de encuentro al menos 20 minutos antes de la hora de salida.",
 
     cancellationPolicy:
-      "Las condiciones de cancelación y reembolso dependerán del momento en que se solicite la cancelación.",
+      "Las cancelaciones de participantes no tienen reembolso ni crédito automático. El cupo puede cederse, con aviso previo y dentro del plazo establecido. Los casos excepcionales se evalúan individualmente según las circunstancias y los costos ya comprometidos; si no hay sustituto, el cupo se cancela sin devolución automática. Las cancelaciones de Ruticas RD y las tardanzas se gestionan conforme a estas mismas condiciones.",
 
     itinerary: [
       {

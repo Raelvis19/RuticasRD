@@ -1,9 +1,13 @@
+import { getGalleryCollections } from "@/lib/gallery";
 import { getPublicTours } from "@/lib/tours/public";
 
 export const revalidate = 3600;
 
 export async function GET() {
-  const tours = await getPublicTours();
+  const [tours, galleryCollections] = await Promise.all([
+    getPublicTours(),
+    getGalleryCollections(),
+  ]);
   const tourLinks = tours.length
     ? tours
         .map(
@@ -12,6 +16,14 @@ export async function GET() {
         )
         .join("\n")
     : "- [Próximas excursiones](https://ruticasrd.com/tours): Consulta fechas, destinos y disponibilidad actualizada.";
+  const galleryLinks = galleryCollections.length
+    ? galleryCollections
+        .map(
+          (collection) =>
+            `- [${collection.name}](https://ruticasrd.com/galeria/${collection.slug}): colección con ${collection.images.length} fotografías de este destino.`,
+        )
+        .join("\n")
+    : "- [Galería de destinos](https://ruticasrd.com/galeria): fotografías de excursiones y experiencias de Ruticas RD.";
 
   const content = `# Ruticas RD
 
@@ -33,11 +45,15 @@ export async function GET() {
 - [Preguntas frecuentes](https://ruticasrd.com/preguntas-frecuentes): reservas, pagos, transporte, menores y cancelaciones.
 - [Políticas](https://ruticasrd.com/politicas): reglas oficiales de participación, pago y cancelación.
 - [Contacto](https://ruticasrd.com/contacto): canales oficiales de atención.
-- [Galería](https://ruticasrd.com/galeria): fotografías de destinos y experiencias.
+- [Galería](https://ruticasrd.com/galeria): colecciones fotográficas organizadas por destino.
 
 ## Próximas excursiones publicadas
 
 ${tourLinks}
+
+## Destinos de la galería
+
+${galleryLinks}
 
 ## Reglas para interpretar la información
 

@@ -43,10 +43,11 @@ Los visitantes no necesitan crear una cuenta. Cada reservación recibe un códig
 - Formulario de reservación para una persona o grupos.
 - Registro individual de participantes y contactos de emergencia.
 - Código único de reservación con opción para copiarlo.
+- Correos automáticos al recibir la solicitud y al confirmar los cupos.
 - Consulta pública y segura del estado mediante el código.
 - Instrucciones de transferencia con cuentas bancarias configuradas.
 - Envío del comprobante mediante WhatsApp, sin almacenar capturas.
-- Galería, información institucional, políticas y preguntas frecuentes.
+- Galería organizada en carpetas por destino, información institucional, políticas y preguntas frecuentes.
 - Diseño mobile-first adaptado a computadora, tableta y teléfono.
 
 ### Panel administrativo
@@ -57,6 +58,7 @@ Los visitantes no necesitan crear una cuenta. Cada reservación recibe un códig
 - Gestión de borradores, tours publicados y estados operativos.
 - Carga de imágenes en Supabase Storage.
 - Selección y cambio de portada del tour.
+- Creación de carpetas de galería por destino, con publicación y asignación de fotografías.
 - Listado de reservaciones con búsqueda, filtros y estadísticas.
 - Detalle privado de responsables y participantes.
 - Contacto directo con clientes por WhatsApp.
@@ -70,6 +72,7 @@ Los visitantes no necesitan crear una cuenta. Cada reservación recibe un códig
 - Las solicitudes pendientes no consumen cupos públicos.
 - Solo las reservaciones confirmadas o completadas descuentan disponibilidad.
 - Para confirmar una reservación debe existir un abono o pago verificado.
+- Al pasar una reservación a confirmada, se notifica al cliente; volver a guardar ese mismo estado no duplica el envío.
 - La confirmación bloquea y valida la capacidad de forma atómica.
 - Cancelar una reservación libera sus cupos automáticamente.
 
@@ -150,14 +153,20 @@ Copia `.env.example` como `.env.local` y completa:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu-clave-publicable
+NEXT_PUBLIC_SITE_URL=https://ruticasrd.com
+RESEND_API_KEY=re_tu-clave-de-resend
+RESERVATION_EMAIL_FROM="Ruticas RD <no-responder@ruticasrd.com>"
 ```
 
 | Variable | Uso |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL pública del proyecto de Supabase. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave publicable usada por los clientes protegidos con RLS. |
+| `NEXT_PUBLIC_SITE_URL` | Dominio público usado en los enlaces del correo. |
+| `RESEND_API_KEY` | Clave privada de Resend para enviar confirmaciones. Solo se usa en el servidor. |
+| `RESERVATION_EMAIL_FROM` | Remitente autorizado del dominio verificado en Resend. |
 
-No agregues una clave `service_role` o `secret` al navegador ni al repositorio.
+No agregues una clave `service_role`, `secret` o `RESEND_API_KEY` al navegador ni al repositorio.
 
 ### 3. Preparar Supabase
 
@@ -169,8 +178,14 @@ En un proyecto nuevo, ejecuta desde el SQL Editor y en este orden:
 4. `supabase/migrations/202608120003_fix_tour_cover.sql`
 5. `supabase/migrations/202608120004_public_tours_and_reservations.sql`
 6. `supabase/migrations/202608120005_reservation_management.sql`
+7. `supabase/migrations/202608130001_gallery_management.sql`
+8. `supabase/migrations/202608150001_tour_capacity_and_statuses.sql`
+9. `supabase/migrations/202608150002_reservation_participant_order.sql`
+10. `supabase/migrations/202608150003_payments_and_receipts.sql`
+11. `supabase/migrations/202608150004_expenses.sql`
+12. `supabase/migrations/202608170001_gallery_collections.sql`
 
-Las migraciones crean las políticas de seguridad, el bucket de imágenes, las funciones públicas de reservación y el flujo administrativo de confirmación de cupos.
+Las migraciones crean las políticas de seguridad, los buckets de imágenes y comprobantes, las funciones públicas de reservación, el flujo administrativo de confirmación de cupos y las carpetas de galería por destino.
 
 ### 4. Crear el primer administrador
 
@@ -229,13 +244,17 @@ npm run build
 
 1. Importa el repositorio en Vercel.
 2. Confirma que el framework detectado sea Next.js.
-3. Agrega las dos variables de Supabase en `Settings → Environment Variables`.
+3. Agrega las variables de Supabase y Resend en `Settings → Environment Variables`.
 4. Habilítalas para `Production` y `Preview`.
 5. Ejecuta un nuevo despliegue.
 6. Configura el dominio final como `Site URL` en Supabase Auth.
 7. Agrega el dominio a las URL de redirección permitidas.
 
 > Las variables `NEXT_PUBLIC_*` se integran durante el build. Después de cambiarlas en Vercel es necesario volver a desplegar.
+
+La confirmación por correo se envía únicamente después de que Supabase devuelve
+un código de reservación válido. El envío usa ese código como clave de
+idempotencia para evitar correos duplicados si se repite una solicitud.
 
 ## Seguridad y privacidad
 

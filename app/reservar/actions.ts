@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { sendReservationConfirmationEmail } from "@/lib/email/reservation-confirmation";
 import { createClient } from "@/lib/supabase/server";
+import { getPublicTourById } from "@/lib/tours/public";
 
 export interface PublicReservationCustomer {
   fullName: string;
@@ -26,7 +28,7 @@ export async function createReservationAction(input: {
   tourId: string;
   customer: PublicReservationCustomer;
   participants: PublicReservationParticipant[];
-}): Promise<{ code?: string; error?: string }> {
+}): Promise<{ code?: string; emailSent?: boolean; error?: string }> {
   if (!isUuid(input.tourId)) {
     return { error: "No pudimos identificar el tour seleccionado." };
   }
@@ -35,11 +37,29 @@ export async function createReservationAction(input: {
     return { error: "La información de la reservación está incompleta." };
   }
 
+  const customer = normalizeCustomer(input.customer);
+  const participants = input.participants.map(normalizeParticipant);
+
+  if (!isValidEmail(customer.email)) {
+    return {
+      error: "Escribe un correo electrónico válido para recibir tu reservación.",
+    };
+  }
+
+  if (participants.length < 1 || participants.length > 50) {
+    return { error: "La cantidad de participantes no es válida." };
+  }
+
+  const tour = await getPublicTourById(input.tourId);
+  if (!tour) {
+    return { error: "Este tour ya no está disponible para reservaciones." };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_public_reservation", {
     p_tour_id: input.tourId,
-    p_customer: input.customer,
-    p_participants: input.participants,
+    p_customer: customer,
+    p_participants: participants,
   });
 
   if (error) {
@@ -52,9 +72,54 @@ export async function createReservationAction(input: {
     };
   }
 
+  const emailResult = await sendReservationConfirmationEmail({
+    reservationCode: data,
+    customer,
+    participants,
+    tour: {
+      title: tour.title,
+      location: tour.location,
+      province: tour.province,
+      meetingPoint: tour.meetingPoint,
+      date: tour.date,
+      departureTime: tour.departureTime,
+      price: tour.price,
+      depositAmount: tour.depositAmount,
+    },
+  });
+
   revalidatePath("/");
   revalidatePath("/tours");
-  return { code: data };
+  return { code: data, emailSent: emailResult.sent };
+}
+
+function normalizeCustomer(customer: PublicReservationCustomer) {
+  return {
+    fullName: String(customer.fullName ?? "").trim(),
+    documentNumber: String(customer.documentNumber ?? "").trim(),
+    phone: String(customer.phone ?? "").trim(),
+    email: String(customer.email ?? "").trim().toLowerCase(),
+    city: String(customer.city ?? "").trim(),
+  };
+}
+
+function normalizeParticipant(participant: PublicReservationParticipant) {
+  return {
+    fullName: String(participant.fullName ?? "").trim(),
+    documentNumber: String(participant.documentNumber ?? "").trim(),
+    city: String(participant.city ?? "").trim(),
+    emergencyName: String(participant.emergencyName ?? "").trim(),
+    emergencyPhone: String(participant.emergencyPhone ?? "").trim(),
+    isMinor: Boolean(participant.isMinor),
+    guardianName: String(participant.guardianName ?? "").trim(),
+  };
+}
+
+function isValidEmail(value: string) {
+  return (
+    value.length <= 180 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  );
 }
 
 function getReservationErrorMessage(message: string) {

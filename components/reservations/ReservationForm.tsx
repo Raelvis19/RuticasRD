@@ -136,6 +136,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       !customer.fullName.trim() ||
       !customer.documentNumber.trim() ||
       !customer.phone.trim() ||
+      !customer.email.trim() ||
       !customer.city.trim()
     ) {
       setError(
@@ -227,6 +228,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       participants: reservationParticipants,
       totalAmount,
       requiredDeposit,
+      emailSent: result.emailSent === true,
       status: "pendiente_verificacion",
       createdAt: new Date().toISOString(),
     };
@@ -524,11 +526,12 @@ function StepTwo({
           />
           <Field
             name="customer-email"
-            label="Correo electrónico"
+            label="Correo electrónico *"
             type="email"
             inputMode="email"
             value={customer.email}
             autoComplete="email"
+            required
             onChange={(value) => onCustomerChange("email", value)}
           />
           <Field

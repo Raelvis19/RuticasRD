@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import { sendConfirmedReservationEmail } from "@/lib/email/reservation-confirmed";
 import {
   paymentStatusOptions,
   reservationStatusOptions,
@@ -48,6 +49,16 @@ export async function updateReservationAction(
   }
 
   const supabase = await createClient();
+  const { data: previousReservation, error: previousError } = await supabase
+    .from("reservations")
+    .select("reservation_status")
+    .eq("id", reservationId)
+    .maybeSingle();
+
+  if (previousError || !previousReservation) {
+    return { message: "No pudimos consultar el estado actual de la reservación." };
+  }
+
   const { error } = await supabase.rpc("admin_update_reservation", {
     p_reservation_id: reservationId,
     p_reservation_status: reservationStatus,
@@ -76,12 +87,25 @@ export async function updateReservationAction(
     return { message: "No pudimos actualizar la reservación." };
   }
 
+  let emailDelivery: "sent" | "failed" | undefined;
+  if (
+    previousReservation.reservation_status !== "confirmada" &&
+    reservationStatus === "confirmada"
+  ) {
+    const emailResult = await sendConfirmedReservationEmail(reservationId);
+    emailDelivery = emailResult.sent ? "sent" : "failed";
+  }
+
   revalidatePath("/");
   revalidatePath("/tours");
   revalidatePath("/admin");
   revalidatePath("/admin/reservaciones");
   revalidatePath(`/admin/reservaciones/${reservationId}`);
-  redirect(`/admin/reservaciones/${reservationId}?updated=1`);
+  redirect(
+    `/admin/reservaciones/${reservationId}?updated=1${
+      emailDelivery ? `&email=${emailDelivery}` : ""
+    }`,
+  );
 }
 
 function getText(formData: FormData, name: string) {

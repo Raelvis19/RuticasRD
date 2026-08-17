@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import { sendConfirmedReservationEmail } from "@/lib/email/reservation-confirmed";
 import { createClient } from "@/lib/supabase/server";
 
 export interface PaymentActionState {
@@ -75,7 +77,14 @@ export async function reviewPaymentAction(formData: FormData) {
   if (!isUuid(paymentId) || !isUuid(reservationId) || !["verificado", "rechazado"].includes(decision)) return;
 
   const supabase = await createClient();
-  await supabase
+  const { data: previousReservation, error: previousError } = await supabase
+    .from("reservations")
+    .select("reservation_status")
+    .eq("id", reservationId)
+    .maybeSingle();
+  if (previousError || !previousReservation) return;
+
+  const { error: reviewError } = await supabase
     .from("payments")
     .update({
       verification_status: decision,
@@ -85,9 +94,38 @@ export async function reviewPaymentAction(formData: FormData) {
     })
     .eq("id", paymentId)
     .eq("reservation_id", reservationId);
+  if (reviewError) {
+    console.error("[payments] Could not review payment:", reviewError);
+    return;
+  }
+
+  const { data: currentReservation, error: currentError } = await supabase
+    .from("reservations")
+    .select("reservation_status")
+    .eq("id", reservationId)
+    .maybeSingle();
+  if (currentError || !currentReservation) return;
+
+  let emailDelivery: "sent" | "failed" | undefined;
+  if (
+    previousReservation.reservation_status !== "confirmada" &&
+    currentReservation.reservation_status === "confirmada"
+  ) {
+    const emailResult = await sendConfirmedReservationEmail(reservationId);
+    emailDelivery = emailResult.sent ? "sent" : "failed";
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
   revalidatePath(`/admin/reservaciones/${reservationId}`);
   revalidatePath("/admin/reservaciones");
   revalidatePath("/tours");
+
+  if (emailDelivery) {
+    redirect(
+      `/admin/reservaciones/${reservationId}?email=${emailDelivery}`,
+    );
+  }
 }
 
 function text(formData: FormData, name: string) {

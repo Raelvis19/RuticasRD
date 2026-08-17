@@ -3,11 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   CalendarDays,
   CircleDollarSign,
   ExternalLink,
   Mail,
+  MailCheck,
   MapPin,
   MessageCircle,
   Phone,
@@ -35,7 +37,7 @@ export default async function AdminReservationDetailPage({
   searchParams,
 }: {
   params: Promise<{ reservationId: string }>;
-  searchParams: Promise<{ updated?: string }>;
+  searchParams: Promise<{ updated?: string; email?: string }>;
 }) {
   const [{ reservationId }, query] = await Promise.all([params, searchParams]);
   const { reservation, error } = await getAdminReservationDetail(reservationId);
@@ -96,6 +98,29 @@ export default async function AdminReservationDetailPage({
         >
           La reservación se actualizó correctamente. Los cupos públicos ya
           reflejan este cambio.
+        </div>
+      )}
+
+      {query.email === "sent" && (
+        <div
+          role="status"
+          className="mt-4 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-bold leading-6 text-emerald-800"
+        >
+          <MailCheck size={20} className="mt-0.5 shrink-0" />
+          La reservación quedó confirmada y el cliente recibió el correo con su
+          código, sus cupos y el resumen del pago.
+        </div>
+      )}
+
+      {query.email === "failed" && (
+        <div
+          role="alert"
+          className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-bold leading-6 text-amber-900"
+        >
+          <AlertTriangle size={20} className="mt-0.5 shrink-0" />
+          La reservación y los cupos se confirmaron, pero el correo no pudo
+          enviarse. Contacta al cliente por WhatsApp y revisa los registros de
+          Resend para identificar la causa.
         </div>
       )}
 

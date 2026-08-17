@@ -7,6 +7,8 @@ import {
   CheckCircle2,
   Copy,
   Home,
+  MailCheck,
+  MailWarning,
   MessageCircle,
   Search,
 } from "lucide-react";
@@ -25,6 +27,10 @@ interface StoredReservation {
   participantCount: number;
   totalAmount: number;
   requiredDeposit: number;
+  customer?: {
+    email?: string;
+  };
+  emailSent?: boolean;
   status: string;
 }
 
@@ -81,6 +87,29 @@ export default function ReservationConfirmation({ code }: { code: string }) {
               confirmado después de verificar el pago o abono.
             </p>
           </div>
+
+          {reservation?.emailSent === true && (
+            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900 sm:mt-7">
+              <MailCheck className="mt-0.5 shrink-0" size={20} />
+              <p>
+                Enviamos el código y todos los detalles de la reservación a{" "}
+                <strong>{reservation.customer?.email}</strong>.
+              </p>
+            </div>
+          )}
+
+          {reservation?.emailSent === false && (
+            <div
+              role="alert"
+              className="mt-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 sm:mt-7"
+            >
+              <MailWarning className="mt-0.5 shrink-0" size={20} />
+              <p>
+                La reservación quedó registrada, pero el correo no pudo enviarse.
+                Conserva este código o toma una captura de esta pantalla.
+              </p>
+            </div>
+          )}
 
           <div className="mt-7 rounded-3xl bg-[#07130f] p-5 text-center text-white sm:mt-8 sm:p-6">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/50">

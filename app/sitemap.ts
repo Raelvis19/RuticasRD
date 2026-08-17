@@ -1,11 +1,15 @@
 import type { MetadataRoute } from "next";
 
+import { getGalleryCollections } from "@/lib/gallery";
 import { getPublicTours } from "@/lib/tours/public";
 
 const baseUrl = "https://ruticasrd.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const tours = await getPublicTours();
+  const [tours, galleryCollections] = await Promise.all([
+    getPublicTours(),
+    getGalleryCollections(),
+  ]);
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/tours`, changeFrequency: "daily", priority: 0.95 },
@@ -24,6 +28,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.9,
       images: [absoluteUrl(tour.coverImage)],
+    })),
+    ...galleryCollections.map((collection) => ({
+      url: `${baseUrl}/galeria/${collection.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+      images: collection.images
+        .slice(0, 1)
+        .map((image) => absoluteUrl(image.src)),
     })),
   ];
 }

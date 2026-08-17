@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   title: "Contacto",
   description:
     "Contacta a Ruticas RD para recibir información sobre excursiones, reservaciones, pagos y próximas aventuras.",
+  alternates: { canonical: "/contacto" },
 };
 
 const contactTopics = [

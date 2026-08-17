@@ -423,7 +423,7 @@ export default function TourForm({
               placeholder={"Alimentación\nGastos personales"}
             />
             <ListField
-              label="Requisitos"
+              label="Que debes llevar"
               name="requirements"
               value={values.requirements}
               onChange={(value) => setField("requirements", value)}

@@ -8,7 +8,7 @@ import {
   type ReservationUpdateState,
 } from "@/app/admin/(protected)/reservaciones/actions";
 import {
-  paymentStatusOptions,
+  paymentStatusLabels,
   reservationStatusOptions,
   type PaymentStatus,
   type ReservationStatus,
@@ -34,7 +34,6 @@ export default function ReservationUpdateForm({
   const [reservationStatus, setReservationStatus] = useState(
     initialReservationStatus,
   );
-  const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
   const [adminNotes, setAdminNotes] = useState(initialAdminNotes);
 
   return (
@@ -80,25 +79,18 @@ export default function ReservationUpdateForm({
           </select>
         </label>
 
-        <label className="block">
+        <div className="block">
           <span className="mb-2 block text-sm font-black text-[#294238]">
             Estado del pago
           </span>
-          <select
-            name="payment_status"
-            value={paymentStatus}
-            onChange={(event) =>
-              setPaymentStatus(event.target.value as PaymentStatus)
-            }
-            className="min-h-13 w-full rounded-2xl border border-[#d5e1da] bg-[#f9fbfa] px-4 font-bold outline-none focus:border-[#0f5132]"
-          >
-            {paymentStatusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+          <input type="hidden" name="payment_status" value={initialPaymentStatus} />
+          <div className="flex min-h-13 items-center rounded-2xl border border-[#d5e1da] bg-[#f1f5f2] px-4 font-bold text-[#52675e]">
+            {paymentStatusLabels[initialPaymentStatus]}
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[#71847a]">
+            Se calcula automáticamente con los pagos verificados.
+          </p>
+        </div>
 
         <label className="block">
           <span className="mb-2 block text-sm font-black text-[#294238]">

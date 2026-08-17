@@ -24,6 +24,7 @@ import { getPublicTourBySlug } from "@/lib/tours/public";
 import type {
   TourCategory,
   TourDifficulty,
+  TourStatus,
 } from "@/types/tour";
 
 import { notFound } from "next/navigation";
@@ -67,6 +68,25 @@ export async function generateMetadata({
   return {
     title: tour.title,
     description: tour.shortDescription,
+    alternates: { canonical: `/tours/${tour.slug}` },
+    openGraph: {
+      type: "website",
+      url: `/tours/${tour.slug}`,
+      title: `${tour.title} | Ruticas RD`,
+      description: tour.shortDescription,
+      images: [
+        {
+          url: tour.coverImage,
+          alt: `${tour.title} en ${tour.location}, República Dominicana`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${tour.title} | Ruticas RD`,
+      description: tour.shortDescription,
+      images: [tour.coverImage],
+    },
   };
 }
 
@@ -98,7 +118,7 @@ export default async function TourDetailPage({
 
   const isSoldOut =
     tour.availableSpots <= 0 ||
-    tour.status === "cupos_agotados";
+    tour.status === "agotado";
 
   const isLowAvailability =
     !isSoldOut &&
@@ -113,8 +133,50 @@ export default async function TourDetailPage({
     ? `/reservar/${tour.id}?modo=espera`
     : `/reservar/${tour.id}`;
 
+  const eventJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: tour.title,
+    description: tour.shortDescription,
+    image: [tour.coverImage, ...tour.images].map(absoluteUrl),
+    startDate: `${tour.date}T${tour.departureTime}:00-04:00`,
+    eventStatus: eventStatus(tour.status),
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: {
+      "@type": "Place",
+      name: tour.location,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: tour.location,
+        addressRegion: tour.province,
+        addressCountry: "DO",
+      },
+    },
+    organizer: {
+      "@type": "Organization",
+      name: "Ruticas RD",
+      url: "https://ruticasrd.com",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://ruticasrd.com/tours/${tour.slug}`,
+      price: tour.price,
+      priceCurrency: "DOP",
+      validFrom: tour.createdAt,
+      availability: isSoldOut
+        ? "https://schema.org/SoldOut"
+        : "https://schema.org/InStock",
+    },
+  };
+
   return (
     <main className="min-h-screen bg-[#f4f7f5] pb-36 text-[#14231c] lg:pb-0">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
 
       {/* =========================================
           HEADER DEL TOUR
@@ -831,4 +893,15 @@ function Policy({
       </p>
     </div>
   );
+}
+
+function absoluteUrl(value: string) {
+  if (/^https?:\/\//i.test(value)) return value;
+  return `https://ruticasrd.com${value.startsWith("/") ? value : `/${value}`}`;
+}
+
+function eventStatus(status: TourStatus) {
+  if (status === "cancelado") return "https://schema.org/EventCancelled";
+  if (status === "pospuesto") return "https://schema.org/EventPostponed";
+  return "https://schema.org/EventScheduled";
 }

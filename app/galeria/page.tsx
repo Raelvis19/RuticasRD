@@ -1,15 +1,17 @@
 import Image from "next/image";
 
-import { galleryImages } from "@/data/gallery";
+import { getGalleryImages } from "@/lib/gallery";
 
 export const metadata = {
   title: "Galería",
   description:
     "Conoce las experiencias, destinos y aventuras vividas junto a Ruticas RD.",
+  alternates: { canonical: "/galeria" },
 };
 
-export default function GalleryPage() {
-  
+export default async function GalleryPage() {
+  const galleryImages = await getGalleryImages();
+
   return (
     <main className="min-h-screen bg-[#f4f7f5] px-4 pb-20 nav-offset text-[#14231c] sm:px-6 sm:pb-24 lg:px-8">
       <section className="mx-auto max-w-7xl">

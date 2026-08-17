@@ -19,3 +19,8 @@ export interface GalleryImage {
   orientation: MediaOrientation;
   featured?: boolean;
 }
+
+export interface AdminGalleryImage extends GalleryImage {
+  storagePath: string | null;
+  position: number;
+}

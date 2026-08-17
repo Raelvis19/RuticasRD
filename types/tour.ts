@@ -16,9 +16,10 @@ export type TourCategory =
 export type TourStatus =
   | "borrador"
   | "publicado"
-  | "cupos_agotados"
+  | "agotado"
+  | "finalizado"
   | "cancelado"
-  | "completado";
+  | "pospuesto";
 
 export interface TourItineraryItem {
   time?: string;

@@ -17,7 +17,7 @@ export default async function ReservationPage({ params }: ReservationPageProps) 
 
   if (!tour) notFound();
 
-  if (tour.availableSpots <= 0 || tour.status === "cupos_agotados") {
+  if (tour.availableSpots <= 0 || tour.status === "agotado") {
     return (
       <main className="min-h-screen bg-[#f4f7f5] px-4 pb-24 nav-offset text-[#14231c] sm:px-6">
         <section className="mx-auto max-w-xl rounded-[1.5rem] bg-white p-6 text-center shadow-sm sm:rounded-3xl sm:p-8">

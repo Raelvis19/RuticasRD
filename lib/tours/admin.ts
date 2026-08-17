@@ -25,6 +25,8 @@ export interface AdminTourListItem {
   price: number;
   depositAmount: number;
   capacity: number;
+  occupiedSpots: number;
+  availableSpots: number;
   status: TourStatus;
   featured: boolean;
   createdAt: string;
@@ -45,6 +47,10 @@ interface AdminTourRow {
   status: TourStatus;
   featured: boolean;
   created_at: string;
+  reservations: Array<{
+    participant_count: number;
+    reservation_status: string;
+  }> | null;
 }
 
 interface AdminTourMediaRow {
@@ -106,7 +112,7 @@ export async function getAdminTours(): Promise<{
   const { data, error } = await supabase
     .from("tours")
     .select(
-      "id, slug, title, category, difficulty, location, province, departure_at, price, deposit_amount, capacity, status, featured, created_at",
+      "id, slug, title, category, difficulty, location, province, departure_at, price, deposit_amount, capacity, status, featured, created_at, reservations(participant_count, reservation_status)",
     )
     .order("departure_at", { ascending: true });
 
@@ -118,7 +124,20 @@ export async function getAdminTours(): Promise<{
 
   return {
     error: false,
-    tours: rows.map((tour) => ({
+    tours: rows.map((tour) => {
+      const occupiedSpots = (tour.reservations ?? [])
+        .filter((reservation) =>
+          ["confirmada", "completada"].includes(
+            reservation.reservation_status,
+          ),
+        )
+        .reduce(
+          (total, reservation) => total + reservation.participant_count,
+          0,
+        );
+      const availableSpots = Math.max(0, tour.capacity - occupiedSpots);
+
+      return {
       id: tour.id,
       slug: tour.slug,
       title: tour.title,
@@ -130,10 +149,16 @@ export async function getAdminTours(): Promise<{
       price: Number(tour.price),
       depositAmount: Number(tour.deposit_amount),
       capacity: tour.capacity,
-      status: tour.status,
+      occupiedSpots,
+      availableSpots,
+      status:
+        tour.status === "publicado" && availableSpots === 0
+          ? "agotado"
+          : tour.status,
       featured: tour.featured,
       createdAt: tour.created_at,
-    })),
+      };
+    }),
   };
 }
 

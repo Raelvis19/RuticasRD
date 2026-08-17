@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ClipboardList,
+  ReceiptText,
+  Images,
   LayoutDashboard,
   LogOut,
   Map,
@@ -15,11 +17,13 @@ import type { AdminProfile } from "@/lib/auth/admin";
 const navigation = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Tours", href: "/admin/tours", icon: Map },
+  { label: "Galería", href: "/admin/galeria", icon: Images },
   {
     label: "Reservaciones",
     href: "/admin/reservaciones",
     icon: ClipboardList,
   },
+  { label: "Gastos", href: "/admin/gastos", icon: ReceiptText },
 ];
 
 interface AdminShellProps {
@@ -32,7 +36,7 @@ export default function AdminShell({ admin, children }: AdminShellProps) {
 
   return (
     <div className="min-h-screen bg-[#f2f6f3] text-[#14231c] lg:grid lg:grid-cols-[17rem_1fr]">
-      <aside className="hidden min-h-screen flex-col bg-[#07130f] px-5 py-6 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-0 lg:self-start lg:overflow-y-auto">
+      <aside className="hidden min-h-screen flex-col bg-[#07130f] px-5 py-6 text-white print:!hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-0 lg:self-start lg:overflow-y-auto">
         <Link href="/admin" className="flex items-center gap-3 rounded-2xl">
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-white">
             <Image
@@ -98,7 +102,7 @@ export default function AdminShell({ admin, children }: AdminShellProps) {
       </aside>
 
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 border-b border-[#dce6e0] bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 border-b border-[#dce6e0] bg-white/95 px-4 py-3 backdrop-blur-xl print:!hidden sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
             <Link href="/admin" className="flex min-w-0 items-center gap-3 lg:hidden">
               <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white shadow-sm">
@@ -152,7 +156,7 @@ export default function AdminShell({ admin, children }: AdminShellProps) {
           </nav>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <main className="px-4 py-6 print:!p-0 sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>

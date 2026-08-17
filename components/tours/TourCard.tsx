@@ -22,7 +22,7 @@ const difficultyLabels: Record<TourDifficulty, string> = {
 
 export default function TourCard({ tour }: TourCardProps) {
   const isSoldOut =
-    tour.availableSpots <= 0 || tour.status === "cupos_agotados";
+    tour.availableSpots <= 0 || tour.status === "agotado";
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-[#17392b] bg-[#0b2118] shadow-xl shadow-black/10">

@@ -12,6 +12,7 @@ export const metadata = {
   title: "Tours y excursiones",
   description:
     "Descubre las próximas excursiones, aventuras y experiencias organizadas por Ruticas RD en República Dominicana.",
+  alternates: { canonical: "/tours" },
 };
 
 export default async function ToursPage() {

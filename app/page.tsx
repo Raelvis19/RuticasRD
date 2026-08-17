@@ -3,6 +3,10 @@ import GalleryPreviewSection from "@/components/home/GalleryPreviewSection";
 import HeroSection from "@/components/home/HeroSection";
 import ReservationLookupSection from "@/components/home/ReservationLookupSection";
 
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 export default function HomePage() {
   return (
     <main>

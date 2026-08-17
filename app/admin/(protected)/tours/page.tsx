@@ -6,6 +6,7 @@ import {
   Images,
   MapPin,
   Pencil,
+  Printer,
   Plus,
   Star,
   UsersRound,
@@ -23,9 +24,10 @@ import type { TourStatus } from "@/types/tour";
 const statusStyles: Record<TourStatus, string> = {
   borrador: "bg-amber-100 text-amber-800",
   publicado: "bg-emerald-100 text-emerald-800",
-  cupos_agotados: "bg-orange-100 text-orange-800",
+  agotado: "bg-orange-100 text-orange-800",
+  finalizado: "bg-slate-200 text-slate-700",
   cancelado: "bg-red-100 text-red-800",
-  completado: "bg-slate-200 text-slate-700",
+  pospuesto: "bg-violet-100 text-violet-800",
 };
 
 interface AdminToursPageProps {
@@ -156,7 +158,8 @@ export default async function AdminToursPage({
                   {formatTourDate(tour.departureAt)}
                 </InfoRow>
                 <InfoRow icon={UsersRound}>
-                  Capacidad: {tour.capacity}
+                  {tour.occupiedSpots}/{tour.capacity} ocupados ·{" "}
+                  {tour.availableSpots} disponibles
                 </InfoRow>
                 <div>
                   <p className="font-black text-[#14231c]">{formatDop(tour.price)}</p>
@@ -170,7 +173,7 @@ export default async function AdminToursPage({
                 <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#71847a]">
                   Dificultad: {tourDifficultyLabels[tour.difficulty]}
                 </p>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
                   <Link
                     href={`/admin/tours/${tour.id}/editar`}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#0f5132] px-4 text-sm font-black text-white transition active:scale-[0.98] sm:hover:bg-[#0b4027]"
@@ -184,6 +187,13 @@ export default async function AdminToursPage({
                   >
                     <Images size={17} aria-hidden="true" />
                     Administrar imágenes
+                  </Link>
+                  <Link
+                    href={`/admin/tours/${tour.id}/asistencia`}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#c9d8cf] px-4 text-sm font-black text-[#0f5132] transition active:scale-[0.98] sm:hover:bg-[#f1f6f3]"
+                  >
+                    <Printer size={17} aria-hidden="true" />
+                    Imprimir listado
                   </Link>
                 </div>
               </div>

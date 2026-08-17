@@ -9,7 +9,7 @@ export default async function FeaturedToursSection() {
     .filter(
       (tour) =>
         tour.featured &&
-        ["publicado", "cupos_agotados"].includes(tour.status),
+        ["publicado", "agotado"].includes(tour.status),
     )
     .slice(0, 3);
 

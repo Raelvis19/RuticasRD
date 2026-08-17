@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import ReservationUpdateForm from "@/components/admin/ReservationUpdateForm";
+import PaymentManager from "@/components/admin/PaymentManager";
 import { formatDop } from "@/lib/format";
 import { getAdminReservationDetail } from "@/lib/reservations/admin";
 import {
@@ -125,6 +126,11 @@ export default async function AdminReservationDetailPage({
               />
               <Summary
                 icon={CircleDollarSign}
+                label="Precio por persona"
+                value={formatDop(reservation.pricePerPerson)}
+              />
+              <Summary
+                icon={CircleDollarSign}
                 label="Abono requerido"
                 value={formatDop(reservation.requiredDeposit)}
               />
@@ -132,6 +138,11 @@ export default async function AdminReservationDetailPage({
                 icon={CalendarDays}
                 label="Solicitud recibida"
                 value={formatDateTime(reservation.createdAt)}
+              />
+              <Summary
+                icon={CalendarDays}
+                label="Fecha del tour"
+                value={formatDateTime(reservation.tourDate)}
               />
             </div>
             {reservation.tourSlug && (
@@ -144,6 +155,15 @@ export default async function AdminReservationDetailPage({
               </Link>
             )}
           </section>
+
+          {reservation.customerNotes && (
+            <section className="rounded-[1.75rem] border border-[#dce6e0] bg-white p-5 shadow-sm sm:p-6">
+              <h2 className="text-xl font-black">Notas del cliente</h2>
+              <p className="mt-4 whitespace-pre-wrap leading-7 text-[#52675e]">
+                {reservation.customerNotes}
+              </p>
+            </section>
+          )}
 
           <section className="rounded-[1.75rem] border border-[#dce6e0] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black">Persona responsable</h2>
@@ -210,6 +230,13 @@ export default async function AdminReservationDetailPage({
               ))}
             </div>
           </section>
+
+          <PaymentManager
+            reservationId={reservation.id}
+            payments={reservation.payments}
+            paidAmount={reservation.paidAmount}
+            balanceAmount={reservation.balanceAmount}
+          />
         </div>
 
         <div>

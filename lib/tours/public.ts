@@ -113,7 +113,7 @@ export const getPublicTours = cache(async (): Promise<Tour[]> => {
     supabase
       .from("tours")
       .select(publicTourSelect)
-      .in("status", ["publicado", "cupos_agotados"])
+      .eq("status", "publicado")
       .order("departure_at", { ascending: true }),
     getAvailability(),
   ]);
@@ -135,7 +135,7 @@ export const getPublicTourBySlug = cache(
         .from("tours")
         .select(publicTourSelect)
         .eq("slug", slug)
-        .in("status", ["publicado", "cupos_agotados"])
+        .eq("status", "publicado")
         .maybeSingle(),
       getAvailability(),
     ]);
@@ -155,7 +155,7 @@ export const getPublicTourById = cache(
         .from("tours")
         .select(publicTourSelect)
         .eq("id", tourId)
-        .in("status", ["publicado", "cupos_agotados"])
+        .eq("status", "publicado")
         .maybeSingle(),
       getAvailability(),
     ]);
@@ -192,13 +192,10 @@ function mapPublicTour(
   });
   const imageUrls = images.map((image) => getPublicImageUrl(image.storage_path));
   const coverImage = imageUrls[0] ?? "/images/placeholders/tour-placeholder.webp";
-  const availableSpots =
-    row.status === "cupos_agotados"
-      ? 0
-      : Math.max(
-          0,
-          Math.min(availability.get(row.id) ?? row.capacity, row.capacity),
-        );
+  const availableSpots = Math.max(
+    0,
+    Math.min(availability.get(row.id) ?? row.capacity, row.capacity),
+  );
 
   return {
     id: row.id,
@@ -234,7 +231,7 @@ function mapPublicTour(
     itinerary: parseItinerary(row.itinerary),
     coverImage,
     images: imageUrls.slice(1),
-    status: row.status,
+    status: availableSpots === 0 ? "agotado" : row.status,
     featured: row.featured,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

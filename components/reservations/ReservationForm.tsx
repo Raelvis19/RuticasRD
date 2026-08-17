@@ -84,6 +84,21 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
     [tour.depositAmount, participantCount],
   );
 
+  const reservationParticipants = useMemo(
+    () =>
+      participants.map((participant, index) =>
+        index === 0
+          ? {
+              ...participant,
+              fullName: customer.fullName,
+              documentNumber: customer.documentNumber,
+              city: customer.city,
+            }
+          : participant,
+      ),
+    [customer, participants],
+  );
+
   function updateParticipantCount(nextCount: number) {
     const safeCount = Math.max(1, Math.min(nextCount, tour.availableSpots));
 
@@ -129,7 +144,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       return false;
     }
 
-    for (const participant of participants) {
+    for (const participant of reservationParticipants) {
       if (
         !participant.fullName.trim() ||
         !participant.documentNumber.trim() ||
@@ -186,7 +201,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       result = await createReservationAction({
         tourId: tour.id,
         customer,
-        participants,
+        participants: reservationParticipants,
       });
     } catch {
       setIsSubmitting(false);
@@ -209,7 +224,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       tourDate: tour.date,
       participantCount,
       customer,
-      participants,
+      participants: reservationParticipants,
       totalAmount,
       requiredDeposit,
       status: "pendiente_verificacion",
@@ -273,7 +288,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
             <StepThree
               tour={tour}
               customer={customer}
-              participants={participants}
+              participants={reservationParticipants}
               participantCount={participantCount}
               totalAmount={totalAmount}
               requiredDeposit={requiredDeposit}
@@ -472,9 +487,11 @@ function StepTwo({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-wide text-[#0f5132]">
-              Responsable
+              Participante 1
             </p>
-            <h1 className="text-xl font-black sm:text-2xl">Datos de contacto</h1>
+            <h1 className="text-xl font-black sm:text-2xl">
+              Datos personales y de contacto
+            </h1>
           </div>
         </div>
 
@@ -522,16 +539,44 @@ function StepTwo({
             required
             onChange={(value) => onCustomerChange("city", value)}
           />
+          <Field
+            name="participant-0-emergency-name"
+            label="Contacto de emergencia *"
+            value={participants[0].emergencyName}
+            autoComplete="off"
+            required
+            onChange={(value) =>
+              onParticipantChange(0, "emergencyName", value)
+            }
+          />
+          <Field
+            name="participant-0-emergency-phone"
+            label="Teléfono de emergencia *"
+            type="tel"
+            inputMode="tel"
+            value={participants[0].emergencyPhone}
+            autoComplete="off"
+            required
+            onChange={(value) =>
+              onParticipantChange(0, "emergencyPhone", value)
+            }
+          />
         </div>
+
+        <ParticipantMinorFields
+          participant={participants[0]}
+          index={0}
+          onParticipantChange={onParticipantChange}
+        />
       </section>
 
-      {participants.map((participant, index) => (
+      {participants.slice(1).map((participant, index) => (
         <section
-          key={index}
+          key={index + 1}
           className="rounded-[1.5rem] bg-white p-5 shadow-sm sm:rounded-3xl sm:p-8"
         >
           <p className="text-xs font-black uppercase tracking-[0.15em] text-[#0f5132]">
-            Participante {index + 1}
+            Participante {index + 2}
           </p>
           <h2 className="mt-2 text-xl font-black sm:text-2xl">
             Información del participante
@@ -539,45 +584,47 @@ function StepTwo({
 
           <div className="mt-6 grid gap-5 sm:mt-7 sm:grid-cols-2">
             <Field
-              name={`participant-${index}-name`}
+              name={`participant-${index + 1}-name`}
               label="Nombre completo *"
               value={participant.fullName}
               autoComplete="off"
               required
               onChange={(value) =>
-                onParticipantChange(index, "fullName", value)
+                onParticipantChange(index + 1, "fullName", value)
               }
             />
             <Field
-              name={`participant-${index}-document`}
+              name={`participant-${index + 1}-document`}
               label="Cédula o documento *"
               value={participant.documentNumber}
               autoComplete="off"
               required
               onChange={(value) =>
-                onParticipantChange(index, "documentNumber", value)
+                onParticipantChange(index + 1, "documentNumber", value)
               }
             />
             <Field
-              name={`participant-${index}-city`}
+              name={`participant-${index + 1}-city`}
               label="Ciudad *"
               value={participant.city}
               autoComplete="off"
               required
-              onChange={(value) => onParticipantChange(index, "city", value)}
+              onChange={(value) =>
+                onParticipantChange(index + 1, "city", value)
+              }
             />
             <Field
-              name={`participant-${index}-emergency-name`}
+              name={`participant-${index + 1}-emergency-name`}
               label="Contacto de emergencia *"
               value={participant.emergencyName}
               autoComplete="off"
               required
               onChange={(value) =>
-                onParticipantChange(index, "emergencyName", value)
+                onParticipantChange(index + 1, "emergencyName", value)
               }
             />
             <Field
-              name={`participant-${index}-emergency-phone`}
+              name={`participant-${index + 1}-emergency-phone`}
               label="Teléfono de emergencia *"
               type="tel"
               inputMode="tel"
@@ -585,7 +632,7 @@ function StepTwo({
               autoComplete="off"
               required
               onChange={(value) =>
-                onParticipantChange(index, "emergencyPhone", value)
+                onParticipantChange(index + 1, "emergencyPhone", value)
               }
             />
           </div>
@@ -595,7 +642,7 @@ function StepTwo({
               type="checkbox"
               checked={participant.isMinor}
               onChange={(event) =>
-                onParticipantChange(index, "isMinor", event.target.checked)
+                onParticipantChange(index + 1, "isMinor", event.target.checked)
               }
               className="mt-0.5 h-5 w-5 shrink-0 accent-[#0f5132]"
             />
@@ -611,13 +658,13 @@ function StepTwo({
           {participant.isMinor && (
             <div className="mt-5">
               <Field
-                name={`participant-${index}-guardian`}
+                name={`participant-${index + 1}-guardian`}
                 label="Padre, madre o tutor legal *"
                 value={participant.guardianName}
                 autoComplete="off"
                 required
                 onChange={(value) =>
-                  onParticipantChange(index, "guardianName", value)
+                  onParticipantChange(index + 1, "guardianName", value)
                 }
               />
             </div>
@@ -628,6 +675,57 @@ function StepTwo({
       {error && <ErrorMessage message={error} />}
       <NavigationButtons onBack={onBack} />
     </form>
+  );
+}
+
+function ParticipantMinorFields({
+  participant,
+  index,
+  onParticipantChange,
+}: {
+  participant: ParticipantForm;
+  index: number;
+  onParticipantChange: (
+    index: number,
+    field: keyof ParticipantForm,
+    value: string | boolean,
+  ) => void;
+}) {
+  return (
+    <>
+      <label className="mt-6 flex min-h-14 cursor-pointer touch-manipulation items-start gap-3 rounded-2xl bg-[#f6f9f7] p-4 active:bg-[#edf3ef]">
+        <input
+          type="checkbox"
+          checked={participant.isMinor}
+          onChange={(event) =>
+            onParticipantChange(index, "isMinor", event.target.checked)
+          }
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[#0f5132]"
+        />
+        <div>
+          <p className="font-bold">Este participante es menor de edad</p>
+          <p className="mt-1 text-sm leading-6 text-[#71827a]">
+            Los menores deben asistir acompañados por su padre, madre o tutor
+            legal.
+          </p>
+        </div>
+      </label>
+
+      {participant.isMinor && (
+        <div className="mt-5">
+          <Field
+            name={`participant-${index}-guardian`}
+            label="Padre, madre o tutor legal *"
+            value={participant.guardianName}
+            autoComplete="off"
+            required
+            onChange={(value) =>
+              onParticipantChange(index, "guardianName", value)
+            }
+          />
+        </div>
+      )}
+    </>
   );
 }
 

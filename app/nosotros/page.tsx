@@ -12,6 +12,13 @@ import {
   UsersRound,
 } from "lucide-react";
 
+export const metadata = {
+  title: "Sobre nosotros",
+  description:
+    "Conoce la historia, misión y valores de Ruticas RD, comunidad de excursiones y aventuras en República Dominicana.",
+  alternates: { canonical: "/nosotros" },
+};
+
 const values = [
   {
     icon: ShieldCheck,

@@ -104,6 +104,15 @@ export async function updateTourAction(
     .maybeSingle();
 
   if (error) {
+    if (error.message.includes("capacity_below_occupied_spots")) {
+      return {
+        message:
+          "La capacidad no puede ser menor que los cupos ya confirmados para este tour.",
+        errors: {
+          capacity: "Aumenta la capacidad o libera primero cupos confirmados.",
+        },
+      };
+    }
     if (error.code === "23505") {
       return {
         message: "Ya existe un tour con ese enlace. Utiliza un slug diferente.",

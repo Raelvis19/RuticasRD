@@ -22,7 +22,7 @@ export default function WhatsAppButton() {
       rel="noreferrer"
       aria-label="Hablar con Ruticas RD por WhatsApp"
       className="
-        fixed bottom-[calc(1rem+env(safe-area-inset-bottom))]
+        fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))]
         right-4 z-40
         flex h-14 w-14
         touch-manipulation select-none
@@ -33,7 +33,8 @@ export default function WhatsAppButton() {
         shadow-[0_12px_35px_rgba(0,0,0,0.28)]
         transition
         active:scale-95
-        sm:bottom-6 sm:right-6
+        sm:right-6
+        lg:bottom-6
         lg:h-auto lg:w-auto lg:gap-2
         lg:px-5 lg:py-3.5
         lg:hover:-translate-y-1

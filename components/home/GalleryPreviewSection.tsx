@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Images, MapPin } from "lucide-react";
 
-import { galleryImages } from "@/data/gallery";
+import { getGalleryImages } from "@/lib/gallery";
 
 const galleryLayout = [
   "col-span-2 md:col-span-7 md:row-span-2",
@@ -21,7 +21,8 @@ const categoryLabels = {
   organizacion: "Organización",
 };
 
-export default function GalleryPreviewSection() {
+export default async function GalleryPreviewSection() {
+  const galleryImages = await getGalleryImages();
   const previewImages = galleryImages.slice(0, 6);
 
   if (previewImages.length === 0) {

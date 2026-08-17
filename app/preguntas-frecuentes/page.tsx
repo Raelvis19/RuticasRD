@@ -15,6 +15,13 @@ import { faqs } from "@/data/faqs";
 import { siteContent } from "@/data/site-content";
 import { createWhatsAppUrl } from "@/lib/whatsapp";
 
+export const metadata = {
+  title: "Preguntas frecuentes",
+  description:
+    "Respuestas sobre reservas, pagos, transporte, participantes, cancelaciones y excursiones de Ruticas RD.",
+  alternates: { canonical: "/preguntas-frecuentes" },
+};
+
 const categories = [
   {
     key: "reservas" as const,
@@ -58,6 +65,20 @@ export default function PreguntasFrecuentesPage() {
 
   return (
     <main className="bg-[#f4f7f5] text-[#14231c]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: { "@type": "Answer", text: faq.answer },
+            })),
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
 
       {/* HERO */}
 

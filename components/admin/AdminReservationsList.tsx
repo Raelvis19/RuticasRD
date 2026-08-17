@@ -41,6 +41,12 @@ export default function AdminReservationsList({
 }: AdminReservationsListProps) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusFilter>("todas");
+  const [tour, setTour] = useState("todos");
+  const tours = useMemo(
+    () =>
+      [...new Set(reservations.map((reservation) => reservation.tourTitle))].sort(),
+    [reservations],
+  );
 
   const filteredReservations = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -50,12 +56,16 @@ export default function AdminReservationsList({
         reservation.code.toLowerCase().includes(normalizedSearch) ||
         reservation.customerName.toLowerCase().includes(normalizedSearch) ||
         reservation.customerPhone.toLowerCase().includes(normalizedSearch) ||
-        reservation.tourTitle.toLowerCase().includes(normalizedSearch);
+        reservation.tourTitle.toLowerCase().includes(normalizedSearch) ||
+        reservation.participantNames.some((name) =>
+          name.toLowerCase().includes(normalizedSearch),
+        );
       const matchesStatus =
         status === "todas" || reservation.reservationStatus === status;
-      return matchesSearch && matchesStatus;
+      const matchesTour = tour === "todos" || reservation.tourTitle === tour;
+      return matchesSearch && matchesStatus && matchesTour;
     });
-  }, [reservations, search, status]);
+  }, [reservations, search, status, tour]);
 
   const pendingCount = reservations.filter(
     (reservation) => reservation.reservationStatus === "pendiente_verificacion",
@@ -91,7 +101,7 @@ export default function AdminReservationsList({
       </div>
 
       <div className="mt-6 rounded-[1.5rem] border border-[#dce6e0] bg-white p-4 shadow-sm sm:p-5">
-        <div className="grid gap-3 md:grid-cols-[1fr_15rem]">
+        <div className="grid gap-3 lg:grid-cols-[1fr_14rem_14rem]">
           <label className="relative block">
             <Search
               size={19}
@@ -101,7 +111,7 @@ export default function AdminReservationsList({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar código, nombre, teléfono o tour..."
+              placeholder="Buscar código, cliente, participante, teléfono o tour..."
               aria-label="Buscar reservaciones"
               className="min-h-13 w-full rounded-2xl border border-[#d5e1da] bg-[#f9fbfa] pl-11 pr-4 text-base outline-none focus:border-[#0f5132] focus:ring-4 focus:ring-[#0f5132]/10"
             />
@@ -119,14 +129,28 @@ export default function AdminReservationsList({
               </option>
             ))}
           </select>
+          <select
+            value={tour}
+            onChange={(event) => setTour(event.target.value)}
+            aria-label="Filtrar por tour"
+            className="min-h-13 rounded-2xl border border-[#d5e1da] bg-[#f9fbfa] px-4 font-bold text-[#294238] outline-none focus:border-[#0f5132]"
+          >
+            <option value="todos">Todos los tours</option>
+            {tours.map((tourTitle) => (
+              <option key={tourTitle} value={tourTitle}>
+                {tourTitle}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {(search || status !== "todas") && (
+        {(search || status !== "todas" || tour !== "todos") && (
           <button
             type="button"
             onClick={() => {
               setSearch("");
               setStatus("todas");
+              setTour("todos");
             }}
             className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-sm font-bold text-red-700"
           >

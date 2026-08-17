@@ -41,9 +41,9 @@ export const tourManagementStatusOptions: ReadonlyArray<{
 }> = [
   { value: "borrador", label: "Borrador" },
   { value: "publicado", label: "Publicado" },
-  { value: "cupos_agotados", label: "Cupos agotados" },
+  { value: "finalizado", label: "Finalizado" },
   { value: "cancelado", label: "Cancelado" },
-  { value: "completado", label: "Completado" },
+  { value: "pospuesto", label: "Pospuesto" },
 ];
 
 export const tourCategoryLabels = Object.fromEntries(
@@ -57,9 +57,10 @@ export const tourDifficultyLabels = Object.fromEntries(
 export const tourStatusLabels: Record<TourStatus, string> = {
   borrador: "Borrador",
   publicado: "Publicado",
-  cupos_agotados: "Cupos agotados",
+  agotado: "Agotado",
+  finalizado: "Finalizado",
   cancelado: "Cancelado",
-  completado: "Completado",
+  pospuesto: "Pospuesto",
 };
 
 export const defaultPunctualityPolicy =

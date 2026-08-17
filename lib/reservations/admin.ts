@@ -6,6 +6,7 @@ import type {
   ReservationStatus,
 } from "@/lib/reservations/options";
 import { createClient } from "@/lib/supabase/server";
+import type { Payment } from "@/types/payment";
 
 export interface AdminReservationListItem {
   id: string;
@@ -20,6 +21,7 @@ export interface AdminReservationListItem {
   createdAt: string;
   tourTitle: string;
   tourDate: string;
+  participantNames: string[];
 }
 
 export interface AdminReservationParticipant {
@@ -47,6 +49,9 @@ export interface AdminReservationDetail extends AdminReservationListItem {
   adminNotes: string;
   updatedAt: string;
   participants: AdminReservationParticipant[];
+  payments: Payment[];
+  paidAmount: number;
+  balanceAmount: number;
 }
 
 interface ReservationTourRow {
@@ -68,6 +73,23 @@ interface ReservationListRow {
   payment_status: PaymentStatus;
   created_at: string;
   tours: ReservationTourRow | ReservationTourRow[] | null;
+  reservation_participants: Array<{
+    full_name: string;
+    participant_number?: number | null;
+  }> | null;
+  payments: Array<{
+    id: string;
+    amount: number | string;
+    method: "transferencia" | "efectivo" | "otro";
+    reference: string | null;
+    receipt_path: string | null;
+    verification_status: "pendiente" | "verificado" | "rechazado";
+    paid_at: string;
+    verified_at: string | null;
+    verified_by: string | null;
+    rejection_reason: string | null;
+    created_at: string;
+  }> | null;
 }
 
 interface ReservationDetailRow extends ReservationListRow {
@@ -91,6 +113,7 @@ interface ReservationDetailRow extends ReservationListRow {
     guardian_name: string | null;
     emergency_contact_name: string;
     emergency_contact_phone: string;
+    participant_number: number | null;
   }> | null;
 }
 
@@ -103,7 +126,7 @@ export async function getAdminReservations(): Promise<{
   const { data, error } = await supabase
     .from("reservations")
     .select(
-      "id, reservation_code, customer_name, customer_phone, participant_count, total_amount, required_deposit, reservation_status, payment_status, created_at, tours!inner(id, title, slug, departure_at)",
+      "id, reservation_code, customer_name, customer_phone, participant_count, total_amount, required_deposit, reservation_status, payment_status, created_at, tours!inner(id, title, slug, departure_at), reservation_participants(full_name, participant_number)",
     )
     .order("created_at", { ascending: false })
     .limit(500);
@@ -127,7 +150,7 @@ export async function getAdminReservationDetail(reservationId: string): Promise<
   const { data, error } = await supabase
     .from("reservations")
     .select(
-      "id, reservation_code, tour_id, customer_name, customer_document_type, customer_document_number, customer_phone, customer_email, customer_city, participant_count, customer_notes, admin_notes, price_per_person, deposit_per_person, total_amount, required_deposit, reservation_status, payment_status, created_at, updated_at, tours!inner(id, title, slug, departure_at), reservation_participants(id, full_name, document_type, document_number, city, is_minor, guardian_name, emergency_contact_name, emergency_contact_phone)",
+      "id, reservation_code, tour_id, customer_name, customer_document_type, customer_document_number, customer_phone, customer_email, customer_city, participant_count, customer_notes, admin_notes, price_per_person, deposit_per_person, total_amount, required_deposit, reservation_status, payment_status, created_at, updated_at, tours!inner(id, title, slug, departure_at), reservation_participants(id, full_name, document_type, document_number, city, is_minor, guardian_name, emergency_contact_name, emergency_contact_phone, participant_number), payments(id, amount, method, reference, receipt_path, verification_status, paid_at, verified_at, verified_by, rejection_reason, created_at)",
     )
     .eq("id", reservationId)
     .maybeSingle();
@@ -138,6 +161,38 @@ export async function getAdminReservationDetail(reservationId: string): Promise<
   const row = data as ReservationDetailRow;
   const list = mapListRow(row);
   const tour = getTour(row.tours);
+  const paymentRows = [...(row.payments ?? [])].sort(
+    (first, second) =>
+      new Date(second.paid_at).getTime() - new Date(first.paid_at).getTime(),
+  );
+  const paidAmount = paymentRows
+    .filter((payment) => payment.verification_status === "verificado")
+    .reduce((total, payment) => total + Number(payment.amount), 0);
+  const payments = await Promise.all(
+    paymentRows.map(async (payment): Promise<Payment> => {
+      let receiptUrl: string | undefined;
+      if (payment.receipt_path) {
+        const { data: signed } = await supabase.storage
+          .from("payment-receipts")
+          .createSignedUrl(payment.receipt_path, 600);
+        receiptUrl = signed?.signedUrl;
+      }
+      return {
+        id: payment.id,
+        reservationId: row.id,
+        amount: Number(payment.amount),
+        method: payment.method,
+        reference: payment.reference ?? undefined,
+        receiptUrl,
+        verificationStatus: payment.verification_status,
+        paidAt: payment.paid_at,
+        verifiedAt: payment.verified_at ?? undefined,
+        verifiedBy: payment.verified_by ?? undefined,
+        createdAt: payment.created_at,
+        rejectionReason: payment.rejection_reason ?? undefined,
+      };
+    }),
+  );
 
   return {
     error: false,
@@ -154,7 +209,16 @@ export async function getAdminReservationDetail(reservationId: string): Promise<
       customerNotes: row.customer_notes ?? "",
       adminNotes: row.admin_notes ?? "",
       updatedAt: row.updated_at,
-      participants: (row.reservation_participants ?? []).map((participant) => ({
+      payments,
+      paidAmount,
+      balanceAmount: Math.max(0, Number(row.total_amount) - paidAmount),
+      participants: [...(row.reservation_participants ?? [])]
+        .sort(
+          (first, second) =>
+            (first.participant_number ?? Number.MAX_SAFE_INTEGER) -
+            (second.participant_number ?? Number.MAX_SAFE_INTEGER),
+        )
+        .map((participant) => ({
         id: participant.id,
         fullName: participant.full_name,
         documentType: participant.document_type,
@@ -164,7 +228,7 @@ export async function getAdminReservationDetail(reservationId: string): Promise<
         guardianName: participant.guardian_name ?? "",
         emergencyName: participant.emergency_contact_name,
         emergencyPhone: participant.emergency_contact_phone,
-      })),
+        })),
     },
   };
 }
@@ -184,6 +248,9 @@ function mapListRow(row: ReservationListRow): AdminReservationListItem {
     createdAt: row.created_at,
     tourTitle: tour?.title ?? "Tour no disponible",
     tourDate: tour?.departure_at ?? "",
+    participantNames: (row.reservation_participants ?? []).map(
+      (participant) => participant.full_name,
+    ),
   };
 }
 

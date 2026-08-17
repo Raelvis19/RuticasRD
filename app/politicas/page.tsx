@@ -9,6 +9,13 @@ import {
 
 import { policies } from "@/data/policies";
 
+export const metadata = {
+  title: "Políticas de excursiones y reservaciones",
+  description:
+    "Consulta las políticas de reservas, pagos, cancelaciones, seguridad y participación de Ruticas RD.",
+  alternates: { canonical: "/politicas" },
+};
+
 export default function PoliticasPage() {
   return (
     <main className="bg-[#f4f7f5] text-[#14231c]">

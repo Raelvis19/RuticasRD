@@ -22,4 +22,5 @@ export interface Payment {
   verifiedBy?: string;
 
   createdAt: string;
+  rejectionReason?: string;
 }

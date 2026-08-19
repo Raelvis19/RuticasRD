@@ -153,7 +153,7 @@ Copia `.env.example` como `.env.local` y completa:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu-clave-publicable
-NEXT_PUBLIC_SITE_URL=https://ruticasrd.com
+NEXT_PUBLIC_SITE_URL=https://www.ruticasrd.com
 RESEND_API_KEY=re_tu-clave-de-resend
 RESERVATION_EMAIL_FROM="Ruticas RD <no-responder@ruticasrd.com>"
 ```

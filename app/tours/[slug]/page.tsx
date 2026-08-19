@@ -155,11 +155,11 @@ export default async function TourDetailPage({
     organizer: {
       "@type": "Organization",
       name: "Ruticas RD",
-      url: "https://ruticasrd.com",
+      url: "https://www.ruticasrd.com",
     },
     offers: {
       "@type": "Offer",
-      url: `https://ruticasrd.com/tours/${tour.slug}`,
+      url: `https://www.ruticasrd.com/tours/${tour.slug}`,
       price: tour.price,
       priceCurrency: "DOP",
       validFrom: tour.createdAt,
@@ -897,7 +897,7 @@ function Policy({
 
 function absoluteUrl(value: string) {
   if (/^https?:\/\//i.test(value)) return value;
-  return `https://ruticasrd.com${value.startsWith("/") ? value : `/${value}`}`;
+  return `https://www.ruticasrd.com${value.startsWith("/") ? value : `/${value}`}`;
 }
 
 function eventStatus(status: TourStatus) {

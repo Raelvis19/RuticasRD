@@ -124,7 +124,7 @@ export default async function OpenGraphImage() {
                 background: "#bef264",
               }}
             />
-            ruticasrd.com
+            www.ruticasrd.com
           </div>
         </div>
       </div>

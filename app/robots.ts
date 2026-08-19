@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/reservar/", "/reserva/", "/api/"],
       },
     ],
-    sitemap: "https://ruticasrd.com/sitemap.xml",
-    host: "https://ruticasrd.com",
+    sitemap: "https://www.ruticasrd.com/sitemap.xml",
+    host: "https://www.ruticasrd.com",
   };
 }

@@ -12,18 +12,18 @@ export async function GET() {
     ? tours
         .map(
           (tour) =>
-            `- [${tour.title}](https://ruticasrd.com/tours/${tour.slug}): ${tour.shortDescription} Ubicación: ${tour.location}, ${tour.province}.`,
+            `- [${tour.title}](https://www.ruticasrd.com/tours/${tour.slug}): ${tour.shortDescription} Ubicación: ${tour.location}, ${tour.province}.`,
         )
         .join("\n")
-    : "- [Próximas excursiones](https://ruticasrd.com/tours): Consulta fechas, destinos y disponibilidad actualizada.";
+    : "- [Próximas excursiones](https://www.ruticasrd.com/tours): Consulta fechas, destinos y disponibilidad actualizada.";
   const galleryLinks = galleryCollections.length
     ? galleryCollections
         .map(
           (collection) =>
-            `- [${collection.name}](https://ruticasrd.com/galeria/${collection.slug}): colección con ${collection.images.length} fotografías de este destino.`,
+            `- [${collection.name}](https://www.ruticasrd.com/galeria/${collection.slug}): colección con ${collection.images.length} fotografías de este destino.`,
         )
         .join("\n")
-    : "- [Galería de destinos](https://ruticasrd.com/galeria): fotografías de excursiones y experiencias de Ruticas RD.";
+    : "- [Galería de destinos](https://www.ruticasrd.com/galeria): fotografías de excursiones y experiencias de Ruticas RD.";
 
   const content = `# Ruticas RD
 
@@ -31,7 +31,7 @@ export async function GET() {
 
 ## Información oficial
 
-- Sitio oficial: https://ruticasrd.com
+- Sitio oficial: https://www.ruticasrd.com
 - Ubicación base: San Francisco de Macorís, República Dominicana
 - WhatsApp: +1 829-390-7333
 - Instagram: https://www.instagram.com/ruticasrd
@@ -40,12 +40,12 @@ export async function GET() {
 
 ## Páginas principales
 
-- [Tours y excursiones](https://ruticasrd.com/tours): catálogo oficial de próximas experiencias, precios, fechas y cupos.
-- [Sobre Ruticas RD](https://ruticasrd.com/nosotros): historia, misión, valores y enfoque de organización.
-- [Preguntas frecuentes](https://ruticasrd.com/preguntas-frecuentes): reservas, pagos, transporte, menores y cancelaciones.
-- [Políticas](https://ruticasrd.com/politicas): reglas oficiales de participación, pago y cancelación.
-- [Contacto](https://ruticasrd.com/contacto): canales oficiales de atención.
-- [Galería](https://ruticasrd.com/galeria): colecciones fotográficas organizadas por destino.
+- [Tours y excursiones](https://www.ruticasrd.com/tours): catálogo oficial de próximas experiencias, precios, fechas y cupos.
+- [Sobre Ruticas RD](https://www.ruticasrd.com/nosotros): historia, misión, valores y enfoque de organización.
+- [Preguntas frecuentes](https://www.ruticasrd.com/preguntas-frecuentes): reservas, pagos, transporte, menores y cancelaciones.
+- [Políticas](https://www.ruticasrd.com/politicas): reglas oficiales de participación, pago y cancelación.
+- [Contacto](https://www.ruticasrd.com/contacto): canales oficiales de atención.
+- [Galería](https://www.ruticasrd.com/galeria): colecciones fotográficas organizadas por destino.
 
 ## Próximas excursiones publicadas
 

@@ -292,7 +292,7 @@ function formatDominicanDateTime(value: string) {
 
 function getSiteUrl(path: string) {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const baseUrl = configuredUrl || "https://ruticasrd.com";
+  const baseUrl = configuredUrl || "https://www.ruticasrd.com";
 
   try {
     return new URL(
@@ -300,7 +300,7 @@ function getSiteUrl(path: string) {
       baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`,
     ).toString();
   } catch {
-    return `https://ruticasrd.com${path}`;
+    return `https://www.ruticasrd.com${path}`;
   }
 }
 

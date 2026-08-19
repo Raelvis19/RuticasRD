@@ -15,7 +15,7 @@ const montserrat = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ruticasrd.com"),
+  metadataBase: new URL("https://www.ruticasrd.com"),
   title: {
     default: "Ruticas RD | Excursiones y aventuras",
     template: "%s | Ruticas RD",
@@ -83,10 +83,10 @@ export default function RootLayout({
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://ruticasrd.com/#organization",
+                  "@id": "https://www.ruticasrd.com/#organization",
                   name: "Ruticas RD",
-                  url: "https://ruticasrd.com",
-                  logo: "https://ruticasrd.com/images/brand/logo-ruticas-icon.png",
+                  url: "https://www.ruticasrd.com",
+                  logo: "https://www.ruticasrd.com/images/brand/logo-ruticas-icon.png",
                   description:
                     "Excursiones, senderismo, naturaleza y aventuras organizadas en República Dominicana.",
                   foundingDate: "2026-08-02",
@@ -101,11 +101,11 @@ export default function RootLayout({
                 },
                 {
                   "@type": "WebSite",
-                  "@id": "https://ruticasrd.com/#website",
-                  url: "https://ruticasrd.com",
+                  "@id": "https://www.ruticasrd.com/#website",
+                  url: "https://www.ruticasrd.com",
                   name: "Ruticas RD",
                   inLanguage: "es-DO",
-                  publisher: { "@id": "https://ruticasrd.com/#organization" },
+                  publisher: { "@id": "https://www.ruticasrd.com/#organization" },
                 },
               ],
             }).replace(/</g, "\\u003c"),

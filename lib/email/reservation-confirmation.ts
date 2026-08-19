@@ -156,7 +156,7 @@ function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
             <tr>
               <td style="background:#f5f8f6;padding:22px 32px;text-align:center;color:#71827a;font-size:12px;line-height:1.6;">
                 Ruticas RD · ${escapeHtml(siteContent.contact.location)}<br>
-                Recibiste este mensaje porque usaron esta dirección para solicitar una reservación en ruticasrd.com.
+                Recibiste este mensaje porque usaron esta dirección para solicitar una reservación en www.ruticasrd.com.
               </td>
             </tr>
           </table>
@@ -251,12 +251,12 @@ function formatTime(value: string) {
 
 function getSiteUrl(path: string) {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const baseUrl = configuredUrl || "https://ruticasrd.com";
+  const baseUrl = configuredUrl || "https://www.ruticasrd.com";
 
   try {
     return new URL(path, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`).toString();
   } catch {
-    return `https://ruticasrd.com${path}`;
+    return `https://www.ruticasrd.com${path}`;
   }
 }
 

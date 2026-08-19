@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { getGalleryCollections } from "@/lib/gallery";
 import { getPublicTours } from "@/lib/tours/public";
 
-const baseUrl = "https://ruticasrd.com";
+const baseUrl = "https://www.ruticasrd.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [tours, galleryCollections] = await Promise.all([

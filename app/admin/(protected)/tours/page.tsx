@@ -14,6 +14,7 @@ import {
 
 import { formatDop } from "@/lib/format";
 import { getAdminTours } from "@/lib/tours/admin";
+import DeleteTourButton from "@/components/admin/DeleteTourButton";
 import {
   tourCategoryLabels,
   tourDifficultyLabels,
@@ -173,7 +174,7 @@ export default async function AdminToursPage({
                 <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#71847a]">
                   Dificultad: {tourDifficultyLabels[tour.difficulty]}
                 </p>
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                   <Link
                     href={`/admin/tours/${tour.id}/editar`}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#0f5132] px-4 text-sm font-black text-white transition active:scale-[0.98] sm:hover:bg-[#0b4027]"
@@ -195,6 +196,11 @@ export default async function AdminToursPage({
                     <Printer size={17} aria-hidden="true" />
                     Imprimir listado
                   </Link>
+                  <DeleteTourButton
+                    tourId={tour.id}
+                    tourTitle={tour.title}
+                    relatedData={tour.relatedData}
+                  />
                 </div>
               </div>
             </article>

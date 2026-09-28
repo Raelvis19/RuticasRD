@@ -184,8 +184,9 @@ En un proyecto nuevo, ejecuta desde el SQL Editor y en este orden:
 10. `supabase/migrations/202608150003_payments_and_receipts.sql`
 11. `supabase/migrations/202608150004_expenses.sql`
 12. `supabase/migrations/202608170001_gallery_collections.sql`
+13. `supabase/migrations/202609060001_admin_delete_tour_with_related_data.sql`
 
-Las migraciones crean las políticas de seguridad, los buckets de imágenes y comprobantes, las funciones públicas de reservación, el flujo administrativo de confirmación de cupos y las carpetas de galería por destino.
+Las migraciones crean las políticas de seguridad, los buckets de imágenes y comprobantes, las funciones públicas de reservación, el flujo administrativo de confirmación de cupos, las carpetas de galería por destino y la eliminación segura de tours de prueba.
 
 ### 4. Crear el primer administrador
 

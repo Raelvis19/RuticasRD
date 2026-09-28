@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
+import { TOUR_IMAGE_BUCKET } from "@/lib/tours/storage";
 import {
   tourCategoryOptions,
   tourDifficultyOptions,
@@ -23,6 +24,11 @@ export interface TourFormState {
 }
 
 export type CreateTourState = TourFormState;
+
+export interface DeleteTourState {
+  message?: string;
+  success?: boolean;
+}
 
 const allowedCategories = new Set<TourCategory>(
   tourCategoryOptions.map((option) => option.value),
@@ -135,6 +141,88 @@ export async function updateTourAction(
   revalidatePath("/tours");
   revalidatePath("/");
   redirect("/admin/tours?updated=1");
+}
+
+export async function deleteTourAction(
+  _previousState: DeleteTourState,
+  formData: FormData,
+): Promise<DeleteTourState> {
+  await requireAdmin();
+
+  const tourId = getText(formData, "tour_id");
+  const confirmationTitle = getText(formData, "confirmation_title");
+  if (!isUuid(tourId) || !confirmationTitle) {
+    return {
+      message: "Escribe el título exacto del tour para confirmar la eliminación.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "admin_delete_tour_with_related_data",
+    {
+      p_tour_id: tourId,
+      p_confirmation_title: confirmationTitle,
+    },
+  );
+
+  if (error) {
+    if (error.message.includes("tour_delete_confirmation_mismatch")) {
+      return {
+        message: "El título no coincide. No se eliminó ningún dato.",
+      };
+    }
+    if (error.message.includes("tour_not_found")) {
+      return { message: "Este tour ya no existe." };
+    }
+    if (
+      error.code === "PGRST202" ||
+      error.message.includes("admin_delete_tour_with_related_data")
+    ) {
+      return {
+        message:
+          "Falta activar la actualización de eliminación segura en Supabase.",
+      };
+    }
+
+    console.error("[tours] Could not delete tour:", error);
+    return {
+      message:
+        "No se pudo eliminar el tour. No se modificó la información del panel.",
+    };
+  }
+
+  const deleted = parseDeletedTourData(data);
+  const cleanupFailed = await Promise.all([
+    removeStorageFiles(supabase, TOUR_IMAGE_BUCKET, deleted.tourImagePaths),
+    removeStorageFiles(
+      supabase,
+      "payment-receipts",
+      deleted.paymentReceiptPaths,
+    ),
+    removeStorageFiles(
+      supabase,
+      "expense-receipts",
+      deleted.expenseReceiptPaths,
+    ),
+  ]).then((results) => results.some(Boolean));
+
+  revalidatePath("/");
+  revalidatePath("/tours");
+  if (deleted.slug) revalidatePath(`/tours/${deleted.slug}`);
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/llms.txt");
+  revalidatePath("/admin");
+  revalidatePath("/admin/tours");
+  revalidatePath("/admin/gastos");
+  revalidatePath("/admin/reservaciones");
+
+  return {
+    success: true,
+    message: cleanupFailed
+      ? `“${deleted.title}” fue eliminado. Algunos archivos adjuntos no pudieron borrarse, pero ya no aparecen ni afectan los datos.`
+      : `“${deleted.title}” y todos sus datos relacionados fueron eliminados.`,
+  };
 }
 
 function parseTourForm(formData: FormData):
@@ -400,4 +488,49 @@ function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
+}
+
+interface DeletedTourData {
+  title: string;
+  slug: string;
+  tourImagePaths: string[];
+  paymentReceiptPaths: string[];
+  expenseReceiptPaths: string[];
+}
+
+function parseDeletedTourData(value: unknown): DeletedTourData {
+  const data =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+
+  return {
+    title: typeof data.title === "string" ? data.title : "El tour",
+    slug: typeof data.slug === "string" ? data.slug : "",
+    tourImagePaths: stringValues(data.tour_image_paths),
+    paymentReceiptPaths: stringValues(data.payment_receipt_paths),
+    expenseReceiptPaths: stringValues(data.expense_receipt_paths),
+  };
+}
+
+function stringValues(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter(
+        (item): item is string => typeof item === "string" && Boolean(item),
+      )
+    : [];
+}
+
+async function removeStorageFiles(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bucket: string,
+  paths: string[],
+) {
+  if (paths.length === 0) return false;
+
+  const { error } = await supabase.storage.from(bucket).remove(paths);
+  if (error) {
+    console.error(`[tours] Could not clean ${bucket} files:`, error);
+    return true;
+  }
+
+  return false;
 }

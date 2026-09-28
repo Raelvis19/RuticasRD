@@ -30,6 +30,13 @@ export interface AdminTourListItem {
   status: TourStatus;
   featured: boolean;
   createdAt: string;
+  relatedData: {
+    reservations: number;
+    payments: number;
+    expenses: number;
+    images: number;
+    waitlistEntries: number;
+  };
 }
 
 interface AdminTourRow {
@@ -50,7 +57,11 @@ interface AdminTourRow {
   reservations: Array<{
     participant_count: number;
     reservation_status: string;
+    payments: Array<{ id: string }> | null;
   }> | null;
+  expenses: Array<{ id: string }> | null;
+  tour_images: Array<{ id: string }> | null;
+  waitlist_entries: Array<{ id: string }> | null;
 }
 
 interface AdminTourMediaRow {
@@ -112,7 +123,7 @@ export async function getAdminTours(): Promise<{
   const { data, error } = await supabase
     .from("tours")
     .select(
-      "id, slug, title, category, difficulty, location, province, departure_at, price, deposit_amount, capacity, status, featured, created_at, reservations(participant_count, reservation_status)",
+      "id, slug, title, category, difficulty, location, province, departure_at, price, deposit_amount, capacity, status, featured, created_at, reservations(participant_count, reservation_status, payments(id)), expenses(id), tour_images(id), waitlist_entries(id)",
     )
     .order("departure_at", { ascending: true });
 
@@ -136,6 +147,7 @@ export async function getAdminTours(): Promise<{
           0,
         );
       const availableSpots = Math.max(0, tour.capacity - occupiedSpots);
+      const reservations = tour.reservations ?? [];
 
       return {
       id: tour.id,
@@ -157,6 +169,17 @@ export async function getAdminTours(): Promise<{
           : tour.status,
       featured: tour.featured,
       createdAt: tour.created_at,
+      relatedData: {
+        reservations: reservations.length,
+        payments: reservations.reduce(
+          (total, reservation) =>
+            total + (reservation.payments?.length ?? 0),
+          0,
+        ),
+        expenses: tour.expenses?.length ?? 0,
+        images: tour.tour_images?.length ?? 0,
+        waitlistEntries: tour.waitlist_entries?.length ?? 0,
+      },
       };
     }),
   };

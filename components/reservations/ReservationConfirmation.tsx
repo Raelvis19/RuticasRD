@@ -1,5 +1,7 @@
 "use client";
 
+import type { PublicReservationSummary } from "@/app/reserva/actions";
+import { reservationStatusLabels } from "@/lib/reservations/options";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import {
@@ -26,6 +28,8 @@ interface StoredReservation {
   tourTitle: string;
   participantCount: number;
   totalAmount: number;
+  discountAmount?: number;
+  originalAmount?: number;
   requiredDeposit: number;
   customer?: {
     email?: string;
@@ -34,7 +38,7 @@ interface StoredReservation {
   status: string;
 }
 
-export default function ReservationConfirmation({ code }: { code: string }) {
+export default function ReservationConfirmation({ code, summary }: { code: string; summary: PublicReservationSummary | null }) {
   const [copied, setCopied] = useState(false);
   const storedReservation = useSyncExternalStore(
     subscribeToReservationStorage,
@@ -42,19 +46,23 @@ export default function ReservationConfirmation({ code }: { code: string }) {
     getServerReservationSnapshot,
   );
 
-  const reservation = useMemo(() => {
-    if (!storedReservation) return null;
+  const reservation = useMemo<StoredReservation | null>(() => {
+    const saved = summary ? { ...summary, status: summary.reservationStatus } : null;
+    if (!storedReservation) return saved;
 
     try {
       const parsed = JSON.parse(storedReservation) as StoredReservation;
-      return parsed.code === code ? parsed : null;
+      return parsed.code === code ? { ...parsed, ...saved } : saved;
     } catch {
-      return null;
+      return saved;
     }
-  }, [code, storedReservation]);
+  }, [code, storedReservation, summary]);
+  const isConfirmed = summary?.reservationStatus === "confirmada" || summary?.reservationStatus === "completada";
+  const isCancelled = summary?.reservationStatus === "cancelada";
+  const isFreePrize = reservation?.totalAmount === 0 && (reservation.discountAmount ?? 0) > 0;
   const whatsappUrl = createWhatsAppUrl(
     siteContent.contact.whatsapp,
-    `Hola Ruticas RD, ya realicé el pago o abono de la reservación ${code}. Adjunto mi comprobante para que puedan verificarlo.`,
+    isCancelled ? `Hola Ruticas RD, necesito ayuda con mi reserva cancelada ${code}.` : isFreePrize ? `Hola Ruticas RD, solicito la validación de mi premio para la reservación ${code}.` : `Hola Ruticas RD, ya realicé el pago o abono de la reservación ${code}. Adjunto mi comprobante para que puedan verificarlo.`,
   );
 
   async function copyCode() {
@@ -77,14 +85,13 @@ export default function ReservationConfirmation({ code }: { code: string }) {
 
           <div className="mt-6 text-center sm:mt-7">
             <p className="text-xs font-black uppercase tracking-[0.17em] text-[#0f5132] sm:text-sm">
-              Solicitud recibida
+              {isConfirmed ? "Reserva confirmada" : isCancelled ? "Reserva cancelada" : "Solicitud recibida"}
             </p>
             <h1 className="mt-3 text-2xl font-black sm:text-4xl">
               ¡Tu aventura está en camino!
             </h1>
             <p className="mt-4 leading-7 text-[#61746b]">
-              Hemos registrado tu solicitud. Recuerda que el cupo será
-              confirmado después de verificar el pago o abono.
+              {isCancelled ? "Esta reserva está cancelada. Contacta a Ruticas RD si necesitas ayuda." : isConfirmed ? "Tu reserva está confirmada. Conserva el código para consultar sus detalles." : isFreePrize ? "Tu premio no requiere pago. El administrador revisará el premio y la disponibilidad para confirmar el cupo." : "Hemos registrado tu solicitud. El cupo será confirmado después de verificar el pago o abono."}
             </p>
           </div>
 
@@ -137,18 +144,19 @@ export default function ReservationConfirmation({ code }: { code: string }) {
                   label="Participantes"
                   value={String(reservation.participantCount)}
                 />
+                {(reservation.discountAmount ?? 0) > 0 && <><SummaryRow label="Subtotal" value={formatDop(reservation.originalAmount ?? reservation.totalAmount)} /><SummaryRow label="Descuento" value={formatDop(reservation.discountAmount ?? 0)} /></>}
                 <SummaryRow label="Total" value={formatDop(reservation.totalAmount)} />
                 <SummaryRow
                   label="Abono requerido"
                   value={formatDop(reservation.requiredDeposit)}
                   highlighted
                 />
-                <SummaryRow label="Estado" value="Pendiente de verificación" />
+                <SummaryRow label="Estado" value={summary ? reservationStatusLabels[summary.reservationStatus] : "Pendiente de verificación"} />
               </div>
             </div>
           )}
 
-          <div className="mt-6 rounded-3xl border border-[#dce5df] p-5 sm:mt-7 sm:p-6">
+          {!isFreePrize && !isCancelled && <div className="mt-6 rounded-3xl border border-[#dce5df] p-5 sm:mt-7 sm:p-6">
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e8f3ec] text-[#0f5132]">
                 <Banknote size={22} />
@@ -187,11 +195,11 @@ export default function ReservationConfirmation({ code }: { code: string }) {
               Incluye tu código <strong className="text-[#14231c]">{code}</strong>{" "}
               al enviar el comprobante para identificar el pago correctamente.
             </p>
-          </div>
+          </div>}
 
           <div className="mt-6 rounded-3xl bg-[#edf5f0] p-5 sm:mt-7 sm:p-6">
             <h2 className="font-black text-[#0f5132]">¿Qué sigue?</h2>
-            <ol className="mt-4 space-y-4 text-sm leading-6 text-[#52675e]">
+            {isCancelled ? <p className="mt-4 text-sm">Consulta con Ruticas RD antes de realizar cualquier pago.</p> : isConfirmed && isFreePrize ? <p className="mt-4 text-sm">Tu premio ya está confirmado. Conserva el código y revisa las instrucciones del tour.</p> : isFreePrize ? <p className="mt-4 text-sm">Conserva el código y contacta a Ruticas RD para validar tu premio. No necesitas enviar un comprobante.</p> : <ol className="mt-4 space-y-4 text-sm leading-6 text-[#52675e]">
               <li><strong>1.</strong> Conserva tu código de reservación.</li>
               <li><strong>2.</strong> Realiza el pago o abono mediante transferencia.</li>
               <li>
@@ -202,7 +210,7 @@ export default function ReservationConfirmation({ code }: { code: string }) {
                 <strong>4.</strong> El administrador verificará el pago y
                 confirmará tu cupo.
               </li>
-            </ol>
+            </ol>}
           </div>
 
           {whatsappUrl && (
@@ -213,11 +221,11 @@ export default function ReservationConfirmation({ code }: { code: string }) {
               className="mt-7 flex min-h-14 touch-manipulation items-center justify-center gap-2 rounded-full bg-[#25d366] px-5 text-center font-black text-[#07130f] transition active:scale-[0.98] sm:mt-8"
             >
               <MessageCircle size={19} />
-              Enviar comprobante por WhatsApp
+              {isCancelled ? "Consultar por WhatsApp" : isFreePrize ? "Consultar mi premio por WhatsApp" : "Enviar comprobante por WhatsApp"}
             </a>
           )}
           <p className="mt-3 text-center text-xs leading-5 text-[#71847a]">
-            WhatsApp abrirá el mensaje preparado. Adjunta la captura antes de enviarlo.
+            {isFreePrize || isCancelled ? "WhatsApp abrirá una consulta con tu código de reserva." : "WhatsApp abrirá el mensaje preparado. Adjunta la captura antes de enviarlo."}
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -248,7 +256,7 @@ function subscribeToReservationStorage() {
 }
 
 function getReservationSnapshot() {
-  return sessionStorage.getItem("ruticas:lastReservation");
+  try { return sessionStorage.getItem("ruticas:lastReservation"); } catch { return null; }
 }
 
 function getServerReservationSnapshot() {

@@ -13,6 +13,8 @@ export interface PublicReservationSummary {
   tourDate: string;
   participantCount: number;
   totalAmount: number;
+  originalAmount: number;
+  discountAmount: number;
   requiredDeposit: number;
   reservationStatus: ReservationStatus;
   paymentStatus: PaymentStatus;
@@ -90,6 +92,8 @@ export async function lookupReservationAction(
       tourDate: String(value.tourDate ?? ""),
       participantCount: Number(value.participantCount ?? 0),
       totalAmount: Number(value.totalAmount ?? 0),
+      originalAmount: Number(value.originalAmount ?? value.totalAmount ?? 0),
+      discountAmount: Number(value.discountAmount ?? 0),
       requiredDeposit: Number(value.requiredDeposit ?? 0),
       reservationStatus: reservationStatus as ReservationStatus,
       paymentStatus: paymentStatus as PaymentStatus,

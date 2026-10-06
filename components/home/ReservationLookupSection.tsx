@@ -127,7 +127,13 @@ export default function ReservationLookupSection() {
                   value={formatDop(state.reservation.requiredDeposit)}
                 />
               </div>
-              {state.reservation.tourSlug && (
+                              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <Result label="Subtotal" value={formatDop(state.reservation.originalAmount)} />
+                  <Result label="Descuento" value={formatDop(state.reservation.discountAmount)} />
+                  <Result label="Total final" value={formatDop(state.reservation.totalAmount)} />
+                </div>
+                {state.reservation.totalAmount === 0 && state.reservation.discountAmount > 0 && <p className="mt-3 text-sm">Premio sin pago requerido. La confirmación del cupo corresponde al administrador.</p>}
+                {state.reservation.tourSlug && (
                 <Link
                   href={`/tours/${state.reservation.tourSlug}`}
                   className="mt-6 inline-flex min-h-11 items-center rounded-full border border-white/15 px-4 text-sm font-black text-lime-300"

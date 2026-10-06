@@ -11,6 +11,7 @@ interface TransactionalEmailInput {
   subject: string;
   html: string;
   text: string;
+  timeoutMs?: number;
 }
 
 const RESEND_EMAILS_ENDPOINT = "https://api.resend.com/emails";
@@ -34,6 +35,7 @@ export async function sendTransactionalEmail(
   try {
     const response = await fetch(RESEND_EMAILS_ENDPOINT, {
       method: "POST",
+      ...(input.timeoutMs ? { signal: AbortSignal.timeout(input.timeoutMs) } : {}),
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",

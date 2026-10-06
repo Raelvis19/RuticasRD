@@ -1,8 +1,9 @@
 "use server";
 
+import type { DiscountQuote } from "@/types/discount";
 import { revalidatePath } from "next/cache";
 
-import { sendReservationConfirmationEmail } from "@/lib/email/reservation-confirmation";
+import { sendReservationNotifications } from "@/lib/email/reservation-notifications";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicTourById } from "@/lib/tours/public";
 
@@ -26,9 +27,10 @@ export interface PublicReservationParticipant {
 
 export async function createReservationAction(input: {
   tourId: string;
+  discountCode?: string;
   customer: PublicReservationCustomer;
   participants: PublicReservationParticipant[];
-}): Promise<{ code?: string; emailSent?: boolean; error?: string }> {
+}): Promise<{ code?: string; emailSent?: boolean; pricing?: DiscountQuote; error?: string }> {
   if (!isUuid(input.tourId)) {
     return { error: "No pudimos identificar el tour seleccionado." };
   }
@@ -56,7 +58,8 @@ export async function createReservationAction(input: {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("create_public_reservation", {
+  const { data, error } = await supabase.rpc("create_discounted_reservation", {
+    p_discount_code: input.discountCode?.trim().toUpperCase() || null,
     p_tour_id: input.tourId,
     p_customer: customer,
     p_participants: participants,
@@ -66,14 +69,15 @@ export async function createReservationAction(input: {
     return { error: getReservationErrorMessage(error.message) };
   }
 
-  if (typeof data !== "string" || !data.startsWith("RUT-")) {
+  if (!data || typeof data.code !== "string" || !data.code.startsWith("RUT-")) {
     return {
       error: "Supabase no devolvió un código de reservación válido.",
     };
   }
 
-  const emailResult = await sendReservationConfirmationEmail({
-    reservationCode: data,
+  const emailResult = await sendReservationNotifications({
+    reservationCode: data.code,
+    pricing: data as DiscountQuote,
     customer,
     participants,
     tour: {
@@ -90,7 +94,7 @@ export async function createReservationAction(input: {
 
   revalidatePath("/");
   revalidatePath("/tours");
-  return { code: data, emailSent: emailResult.sent };
+  return { code: data.code, pricing: data as DiscountQuote, emailSent: emailResult.sent };
 }
 
 function normalizeCustomer(customer: PublicReservationCustomer) {
@@ -123,6 +127,7 @@ function isValidEmail(value: string) {
 }
 
 function getReservationErrorMessage(message: string) {
+  if (message.includes("discount_unavailable")) return "El descuento dejó de estar disponible. Revisa el código antes de volver a reservar.";
   if (message.includes("insufficient_spots") || message.includes("tour_sold_out")) {
     return "Ya no quedan suficientes cupos para esta cantidad de participantes.";
   }

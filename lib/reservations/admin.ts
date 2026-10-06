@@ -38,6 +38,9 @@ export interface AdminReservationParticipant {
 
 export interface AdminReservationDetail extends AdminReservationListItem {
   tourId: string;
+  originalAmount: number;
+  discountAmount: number;
+  discountCode: string;
   tourSlug: string;
   customerDocumentType: string;
   customerDocumentNumber: string;
@@ -94,6 +97,9 @@ interface ReservationListRow {
 
 interface ReservationDetailRow extends ReservationListRow {
   tour_id: string;
+  original_amount: number | string;
+  discount_amount: number | string;
+  discount_code: string | null;
   customer_document_type: string;
   customer_document_number: string;
   customer_email: string | null;
@@ -150,7 +156,7 @@ export async function getAdminReservationDetail(reservationId: string): Promise<
   const { data, error } = await supabase
     .from("reservations")
     .select(
-      "id, reservation_code, tour_id, customer_name, customer_document_type, customer_document_number, customer_phone, customer_email, customer_city, participant_count, customer_notes, admin_notes, price_per_person, deposit_per_person, total_amount, required_deposit, reservation_status, payment_status, created_at, updated_at, tours!inner(id, title, slug, departure_at), reservation_participants(id, full_name, document_type, document_number, city, is_minor, guardian_name, emergency_contact_name, emergency_contact_phone, participant_number), payments(id, amount, method, reference, receipt_path, verification_status, paid_at, verified_at, verified_by, rejection_reason, created_at)",
+      "id, reservation_code, tour_id, customer_name, customer_document_type, customer_document_number, customer_phone, customer_email, customer_city, participant_count, original_amount, discount_amount, discount_code, customer_notes, admin_notes, price_per_person, deposit_per_person, total_amount, required_deposit, reservation_status, payment_status, created_at, updated_at, tours!inner(id, title, slug, departure_at), reservation_participants(id, full_name, document_type, document_number, city, is_minor, guardian_name, emergency_contact_name, emergency_contact_phone, participant_number), payments(id, amount, method, reference, receipt_path, verification_status, paid_at, verified_at, verified_by, rejection_reason, created_at)",
     )
     .eq("id", reservationId)
     .maybeSingle();
@@ -199,6 +205,9 @@ export async function getAdminReservationDetail(reservationId: string): Promise<
     reservation: {
       ...list,
       tourId: row.tour_id,
+      originalAmount: Number(row.original_amount),
+      discountAmount: Number(row.discount_amount),
+      discountCode: row.discount_code ?? "",
       tourSlug: tour?.slug ?? "",
       customerDocumentType: row.customer_document_type,
       customerDocumentNumber: row.customer_document_number,

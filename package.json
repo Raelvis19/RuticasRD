@@ -7,7 +7,9 @@
     "dev:network": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:discounts": "node tests/discounts.mjs",
+    "test:reservation-emails": "node tests/reservation-emails.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -21,6 +23,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

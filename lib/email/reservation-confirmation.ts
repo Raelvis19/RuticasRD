@@ -1,4 +1,5 @@
 import "server-only";
+import type { DiscountQuote } from "@/types/discount";
 
 import { siteContent } from "@/data/site-content";
 import { sendTransactionalEmail } from "@/lib/email/resend";
@@ -35,6 +36,7 @@ interface ReservationEmailTour {
 
 export interface ReservationConfirmationEmailInput {
   reservationCode: string;
+  pricing: DiscountQuote;
   customer: ReservationEmailCustomer;
   participants: ReservationEmailParticipant[];
   tour: ReservationEmailTour;
@@ -57,8 +59,8 @@ export async function sendReservationConfirmationEmail(
 function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
   const { customer, participants, reservationCode, tour } = input;
   const participantCount = participants.length;
-  const totalAmount = tour.price * participantCount;
-  const requiredDeposit = tour.depositAmount * participantCount;
+  const totalAmount = input.pricing.totalAmount;
+  const requiredDeposit = input.pricing.requiredDeposit;
   const confirmationUrl = getSiteUrl(
     `/reserva/confirmacion/${encodeURIComponent(reservationCode)}`,
   );
@@ -106,7 +108,7 @@ function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
               <td style="padding:32px;">
                 <p style="margin:0;color:#0f5132;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;">Solicitud recibida</p>
                 <h1 style="margin:10px 0 12px;font-size:28px;line-height:1.2;color:#14231c;">Hola, ${escapeHtml(customer.fullName)}</h1>
-                <p style="margin:0;color:#61746b;font-size:16px;line-height:1.7;">Registramos tu solicitud de reservación. Guarda el siguiente código, porque lo necesitarás para consultar el estado y enviar el comprobante de pago.</p>
+                <p style="margin:0;color:#61746b;font-size:16px;line-height:1.7;">Registramos tu solicitud de reservación. Guarda el siguiente código, porque lo necesitarás para consultar el estado y contactar a Ruticas RD.</p>
 
                 <div style="margin:24px 0;background:#07130f;border-radius:18px;padding:22px;text-align:center;">
                   <p style="margin:0;color:#a8b5ae;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">Código de reservación</p>
@@ -114,7 +116,7 @@ function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
                 </div>
 
                 <div style="margin-bottom:28px;border:1px solid #f5d690;border-radius:16px;background:#fff8e7;padding:16px;color:#7a5212;font-size:14px;line-height:1.6;">
-                  <strong>Tu cupo aún no está confirmado.</strong> La solicitud no descuenta disponibilidad hasta que Ruticas RD verifique el pago o abono requerido.
+                  <strong>Tu cupo aún no está confirmado.</strong> ${totalAmount === 0 ? "Tu premio no requiere pago. Ruticas RD verificará el premio y la disponibilidad para confirmar el cupo." : "La solicitud no descuenta disponibilidad hasta que Ruticas RD verifique el pago o abono requerido."}
                 </div>
 
                 ${sectionTitle("Información del tour")}
@@ -126,6 +128,8 @@ function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
                   ${detailRow("Punto de encuentro", tour.meetingPoint)}
                   ${detailRow("Participantes", String(participantCount))}
                   ${detailRow("Precio por persona", formatDop(tour.price))}
+                  ${detailRow("Subtotal", formatDop(input.pricing.originalAmount))}
+                  ${detailRow("Descuento", formatDop(input.pricing.discountAmount))}
                   ${detailRow("Total", formatDop(totalAmount), true)}
                   ${detailRow("Abono requerido", formatDop(requiredDeposit), true)}
                   ${detailRow("Estado", "Pendiente de verificación")}
@@ -144,7 +148,7 @@ function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
                 ${participantsHtml}
 
                 <div style="margin-top:28px;text-align:center;">
-                  <a href="${escapeHtml(confirmationUrl)}" style="display:inline-block;border-radius:999px;background:#0f5132;color:#ffffff;padding:15px 24px;text-decoration:none;font-size:15px;font-weight:800;">Ver reservación e instrucciones de pago</a>
+                  <a href="${escapeHtml(confirmationUrl)}" style="display:inline-block;border-radius:999px;background:#0f5132;color:#ffffff;padding:15px 24px;text-decoration:none;font-size:15px;font-weight:800;">Ver detalles de la reservación</a>
                 </div>
 
                 <div style="margin-top:28px;border-radius:16px;background:#edf5f0;padding:18px;color:#3f5b4e;font-size:14px;line-height:1.65;">
@@ -170,8 +174,8 @@ function createReservationEmailHtml(input: ReservationConfirmationEmailInput) {
 function createReservationEmailText(input: ReservationConfirmationEmailInput) {
   const { customer, participants, reservationCode, tour } = input;
   const participantCount = participants.length;
-  const totalAmount = tour.price * participantCount;
-  const requiredDeposit = tour.depositAmount * participantCount;
+  const totalAmount = input.pricing.totalAmount;
+  const requiredDeposit = input.pricing.requiredDeposit;
   const participantDetails = participants
     .map(
       (participant, index) => `
@@ -193,7 +197,7 @@ Hola, ${customer.fullName}.
 
 Código de reservación: ${reservationCode}
 
-Tu cupo aún no está confirmado. La solicitud no descuenta disponibilidad hasta que Ruticas RD verifique el pago o abono requerido.
+Tu cupo aún no está confirmado. ${totalAmount === 0 ? "Tu premio no requiere pago. Ruticas RD verificará el premio y la disponibilidad para confirmar el cupo." : "La solicitud no descuenta disponibilidad hasta que Ruticas RD verifique el pago o abono requerido."}
 
 INFORMACIÓN DEL TOUR
 Tour: ${tour.title}
@@ -203,6 +207,8 @@ Hora de salida: ${formatTime(tour.departureTime)}
 Punto de encuentro: ${tour.meetingPoint}
 Participantes: ${participantCount}
 Precio por persona: ${formatDop(tour.price)}
+Subtotal: ${formatDop(input.pricing.originalAmount)}
+Descuento: ${formatDop(input.pricing.discountAmount)}
 Total: ${formatDop(totalAmount)}
 Abono requerido: ${formatDop(requiredDeposit)}
 Estado: Pendiente de verificación
@@ -215,7 +221,7 @@ Correo electrónico: ${customer.email}
 Ciudad: ${customer.city}
 ${participantDetails}
 
-Consulta la reservación y las instrucciones de pago:
+Consulta los detalles de la reservación:
 ${getSiteUrl(`/reserva/confirmacion/${encodeURIComponent(reservationCode)}`)}
 
 ESTE ES UN CORREO AUTOMÁTICO. NO RESPONDAS NI ENVÍES COMPROBANTES A ESTE CORREO.

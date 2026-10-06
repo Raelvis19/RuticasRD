@@ -32,6 +32,8 @@ interface ConfirmedReservationRow {
   customer_email: string | null;
   participant_count: number;
   total_amount: number | string;
+  original_amount: number | string;
+  discount_amount: number | string;
   payment_status: string;
   reservation_status: string;
   tours:
@@ -54,6 +56,8 @@ interface ConfirmedReservationEmailInput {
   customerEmail: string;
   participantNames: string[];
   totalAmount: number;
+  originalAmount: number;
+  discountAmount: number;
   paidAmount: number;
   paymentStatus: string;
   tour: ConfirmedReservationTourRow;
@@ -66,7 +70,7 @@ export async function sendConfirmedReservationEmail(
   const { data, error } = await supabase
     .from("reservations")
     .select(
-      "reservation_code, customer_name, customer_email, participant_count, total_amount, payment_status, reservation_status, tours!inner(title, slug, location, province, meeting_point, departure_at), reservation_participants(full_name, participant_number), payments(amount, verification_status)",
+      "reservation_code, customer_name, customer_email, participant_count, original_amount, discount_amount, total_amount, payment_status, reservation_status, tours!inner(title, slug, location, province, meeting_point, departure_at), reservation_participants(full_name, participant_number), payments(amount, verification_status)",
     )
     .eq("id", reservationId)
     .maybeSingle();
@@ -111,6 +115,8 @@ export async function sendConfirmedReservationEmail(
     customerEmail,
     participantNames,
     totalAmount: Number(row.total_amount),
+    originalAmount: Number(row.original_amount),
+    discountAmount: Number(row.discount_amount),
     paidAmount,
     paymentStatus: row.payment_status,
     tour,
@@ -190,9 +196,11 @@ function createConfirmedEmailHtml(input: ConfirmedReservationEmailInput) {
 
                 ${sectionTitle("Resumen del pago")}
                 <div style="border:1px solid #dce5df;border-radius:16px;padding:18px;background:#f8faf9;">
+                  ${detailRow("Subtotal", formatDop(input.originalAmount))}
+                  ${detailRow("Descuento", formatDop(input.discountAmount))}
                   ${detailRow("Total de la reservación", formatDop(input.totalAmount))}
                   ${detailRow("Pago verificado", formatDop(input.paidAmount), true)}
-                  ${detailRow("Estado", input.paymentStatus === "pagado" ? "Pago completado" : "Abono confirmado")}
+                  ${detailRow("Estado", input.totalAmount === 0 && input.discountAmount > 0 ? "Premio confirmado, sin pago requerido" : input.paymentStatus === "pagado" ? "Pago completado" : "Abono confirmado")}
                   ${detailRow("Saldo pendiente", formatDop(balance), balance > 0)}
                 </div>
 
@@ -251,9 +259,11 @@ PARTICIPANTES CONFIRMADOS
 ${participantList}
 
 RESUMEN DEL PAGO
+Subtotal: ${formatDop(input.originalAmount)}
+Descuento: ${formatDop(input.discountAmount)}
 Total de la reservación: ${formatDop(input.totalAmount)}
 Pago verificado: ${formatDop(input.paidAmount)}
-Estado: ${input.paymentStatus === "pagado" ? "Pago completado" : "Abono confirmado"}
+Estado: ${input.totalAmount === 0 && input.discountAmount > 0 ? "Premio confirmado, sin pago requerido" : input.paymentStatus === "pagado" ? "Pago completado" : "Abono confirmado"}
 Saldo pendiente: ${formatDop(balance)}
 
 ${balance > 0 ? "Tu cupo está confirmado. Recuerda completar el saldo antes de la fecha límite indicada por Ruticas RD." : "La reservación está pagada completamente."}

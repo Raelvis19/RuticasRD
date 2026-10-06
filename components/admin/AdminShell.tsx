@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ClipboardList,
   ReceiptText,
+  TicketPercent,
   Images,
   LayoutDashboard,
   LogOut,
@@ -23,6 +24,7 @@ const navigation = [
     href: "/admin/reservaciones",
     icon: ClipboardList,
   },
+  { label: "Descuentos", href: "/admin/descuentos", icon: TicketPercent },
   { label: "Gastos", href: "/admin/gastos", icon: ReceiptText },
 ];
 

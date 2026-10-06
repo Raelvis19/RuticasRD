@@ -45,7 +45,7 @@ export default function ReservationUpdateForm({
       <h2 className="text-xl font-black">Actualizar reservación</h2>
       <p className="mt-2 text-sm leading-6 text-[#667a70]">
         Los cupos se descuentan al confirmar una reservación con abono o pago
-        verificado.
+        verificado. Los premios que cubren el total se confirman sin registrar pagos.
       </p>
 
       {state.message && (

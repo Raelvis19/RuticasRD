@@ -67,6 +67,7 @@ export async function updateReservationAction(
   });
 
   if (error) {
+    if (error.message.includes("discount_released_reservation")) return { message: "El descuento de esta reserva cancelada fue liberado. Crea una nueva reserva para continuar." };
     if (error.message.includes("confirmation_requires_payment")) {
       return {
         message:

@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,6 +17,8 @@ import {
   UsersRound,
 } from "lucide-react";
 
+import { previewDiscountAction } from "@/app/reservar/discount-actions";
+import type { DiscountQuote } from "@/types/discount";
 import { createReservationAction } from "@/app/reservar/actions";
 import { formatDop } from "@/lib/format";
 import type { Tour } from "@/types/tour";
@@ -74,15 +76,26 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalAmount = useMemo(
-    () => tour.price * participantCount,
-    [tour.price, participantCount],
-  );
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountResult, setDiscountResult] = useState<{ quote: DiscountQuote; key: string } | null>(null);
+  const [discountMessage, setDiscountMessage] = useState("");
+  const [checkingDiscount, setCheckingDiscount] = useState(false);
+  const discountRequest = useRef(0);
+  const discountKey = JSON.stringify([discountCode.trim().toUpperCase(), participantCount, customer.email.trim().toLowerCase()]);
+  const pricing = discountResult?.key === discountKey ? discountResult.quote : null;
+  const totalAmount = pricing?.totalAmount ?? tour.price * participantCount;
+  const requiredDeposit = pricing?.requiredDeposit ?? tour.depositAmount * participantCount;
 
-  const requiredDeposit = useMemo(
-    () => tour.depositAmount * participantCount,
-    [tour.depositAmount, participantCount],
-  );
+  async function applyDiscount() {
+    const request = ++discountRequest.current;
+    setCheckingDiscount(true);
+    setDiscountMessage("");
+    const result = await previewDiscountAction({ tourId: tour.id, code: discountCode.trim().toUpperCase(), count: participantCount, email: customer.email.trim().toLowerCase() }).catch(() => ({ error: "No pudimos conectar. Inténtalo nuevamente.", quote: undefined }));
+    if (request !== discountRequest.current) return;
+    setCheckingDiscount(false);
+    setDiscountResult(result.quote ? { quote: result.quote, key: discountKey } : null);
+    setDiscountMessage(result.error ?? "Descuento aplicado. Se validará de nuevo al enviar la reserva.");
+  }
 
   const reservationParticipants = useMemo(
     () =>
@@ -187,6 +200,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
   }
 
   async function submitReservation() {
+    if (discountCode.trim() && !pricing) { setError("Aplica el código actualizado o bórralo antes de enviar la reserva."); return; }
     if (!acceptedTerms || !confirmedData) {
       setError(
         "Debes aceptar las condiciones y confirmar que los datos son correctos.",
@@ -201,6 +215,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
     try {
       result = await createReservationAction({
         tourId: tour.id,
+        discountCode: pricing?.discountCode ?? undefined,
         customer,
         participants: reservationParticipants,
       });
@@ -226,8 +241,10 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
       participantCount,
       customer,
       participants: reservationParticipants,
-      totalAmount,
-      requiredDeposit,
+      totalAmount: result.pricing?.totalAmount ?? totalAmount,
+      requiredDeposit: result.pricing?.requiredDeposit ?? requiredDeposit,
+      discountAmount: result.pricing?.discountAmount ?? 0,
+      originalAmount: result.pricing?.originalAmount ?? totalAmount,
       emailSent: result.emailSent === true,
       status: "pendiente_verificacion",
       createdAt: new Date().toISOString(),
@@ -287,6 +304,23 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
           )}
 
           {step === 3 && (
+            <section className="mb-5 rounded-3xl border border-[#dce5df] bg-white p-5 sm:p-8">
+              <label htmlFor="discount-code" className="block font-black">¿Tienes un código de descuento?</label>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <input id="discount-code" value={discountCode} maxLength={40} disabled={isSubmitting || checkingDiscount} autoCapitalize="characters" autoComplete="off"
+                  onChange={(event) => { setDiscountCode(event.target.value.toUpperCase()); setDiscountResult(null); setDiscountMessage(""); }}
+                  className="min-h-12 min-w-0 flex-1 rounded-xl border border-[#d5e0da] px-4 uppercase" placeholder="Tu código" />
+                <button type="button" disabled={!discountCode.trim() || checkingDiscount || isSubmitting} onClick={applyDiscount} className="min-h-12 rounded-full bg-[#0f5132] px-5 font-bold text-white disabled:opacity-50">{checkingDiscount ? "Validando…" : "Aplicar"}</button>
+              </div>
+              <p role="status" className="mt-3 text-sm">{discountMessage}</p>
+              {pricing && <div className="mt-4 space-y-2 text-sm">
+                <ReviewRow label="Subtotal" value={formatDop(pricing.originalAmount)} />
+                <ReviewRow label="Descuento" value={`−${formatDop(pricing.discountAmount)}`} />
+                <ReviewRow label="Total a pagar" value={formatDop(pricing.totalAmount)} />
+              </div>}
+            </section>
+          )}
+          {step === 3 && (
             <StepThree
               tour={tour}
               customer={customer}
@@ -301,7 +335,7 @@ export default function ReservationForm({ tour }: ReservationFormProps) {
               onConfirmedData={setConfirmedData}
               onBack={() => goToStep(2)}
               onSubmit={submitReservation}
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || checkingDiscount}
             />
           )}
         </div>
@@ -855,7 +889,7 @@ function StepThree({
           <p className="text-sm leading-6 text-[#50655b]">
             Enviar esta solicitud no confirma automáticamente tu cupo. La
             reservación será confirmada después de verificar el pago o abono
-            correspondiente.
+            correspondiente, o validar tu premio si el total es cero.
           </p>
         </div>
       </div>

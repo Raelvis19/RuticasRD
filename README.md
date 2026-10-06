@@ -165,6 +165,9 @@ RESERVATION_EMAIL_FROM="Ruticas RD <no-responder@ruticasrd.com>"
 | `NEXT_PUBLIC_SITE_URL` | Dominio público usado en los enlaces del correo. |
 | `RESEND_API_KEY` | Clave privada de Resend para enviar confirmaciones. Solo se usa en el servidor. |
 | `RESERVATION_EMAIL_FROM` | Remitente autorizado del dominio verificado en Resend. |
+| `RESERVATION_ADMIN_EMAIL` | Destinatario del aviso administrativo de nuevas reservas. |
+
+Consulta [Notificaciones al administrador](./docs/admin-email-notifications.md) para la configuración y el comportamiento ante fallos.
 
 No agregues una clave `service_role`, `secret` o `RESEND_API_KEY` al navegador ni al repositorio.
 
@@ -185,6 +188,9 @@ En un proyecto nuevo, ejecuta desde el SQL Editor y en este orden:
 11. `supabase/migrations/202608150004_expenses.sql`
 12. `supabase/migrations/202608170001_gallery_collections.sql`
 13. `supabase/migrations/202609060001_admin_delete_tour_with_related_data.sql`
+14. `supabase/migrations/202610060001_discount_codes.sql`
+
+Para el funcionamiento y activación de códigos de descuento, consulta [Descuentos](./docs/discounts.md).
 
 Las migraciones crean las políticas de seguridad, los buckets de imágenes y comprobantes, las funciones públicas de reservación, el flujo administrativo de confirmación de cupos, las carpetas de galería por destino y la eliminación segura de tours de prueba.
 

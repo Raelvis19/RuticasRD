@@ -1,17 +1,10 @@
 import ReservationConfirmation from "@/components/reservations/ReservationConfirmation";
+import { lookupReservationAction } from "@/app/reserva/actions";
 
-interface ConfirmationPageProps {
-  params: Promise<{
-    codigo: string;
-  }>;
-}
-
-export default async function ConfirmationPage({
-  params,
-}: ConfirmationPageProps) {
+export default async function ConfirmationPage({ params }: { params: Promise<{ codigo: string }> }) {
   const { codigo } = await params;
-
-  return (
-    <ReservationConfirmation code={codigo} />
-  );
+  const form = new FormData();
+  form.set("reservation_code", codigo);
+  const result = await lookupReservationAction({}, form);
+  return <ReservationConfirmation code={codigo} summary={result.reservation ?? null} />;
 }

@@ -128,6 +128,11 @@ export default async function AdminReservationDetailPage({
         <div className="space-y-6">
           <section className="rounded-[1.75rem] border border-[#dce6e0] bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-black">Estado e importes</h2>
+            {reservation.discountCode && <div className="mt-4 rounded-2xl bg-emerald-50 p-4 text-sm">
+              <p className="font-bold">Código: {reservation.discountCode}</p>
+              <p>Subtotal: {formatDop(reservation.originalAmount)} · Descuento: {formatDop(reservation.discountAmount)}</p>
+              {reservation.totalAmount === 0 && <p className="mt-2">Premio gratuito. Confirma desde el formulario de estado sin registrar un pago. Se comprobarán los cupos disponibles.</p>}
+            </div>}
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Summary
                 icon={CalendarDays}
